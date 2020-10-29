@@ -3,17 +3,16 @@ package com.ua.foxminded.university.appConfig;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
@@ -21,6 +20,7 @@ import org.thymeleaf.spring5.ISpringTemplateEngine;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring5.view.ThymeleafViewResolver;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -42,9 +42,6 @@ public class AppConfig implements WebMvcConfigurer {
     private static final String DRIVER = "driver";
     private static final String PASSWORD = "dbpassword";
 
-
-
-
     private final ApplicationContext applicationContext;
 
     @Autowired
@@ -62,7 +59,6 @@ public class AppConfig implements WebMvcConfigurer {
         return sessionFactory;
     }
 
-
     @Bean
     DataSource dataSource() {
         DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
@@ -73,7 +69,6 @@ public class AppConfig implements WebMvcConfigurer {
 
         return driverManagerDataSource;
     }
-
 
     @Bean
     public PlatformTransactionManager hibernateTransactionManager() throws NamingException {
@@ -95,31 +90,41 @@ public class AppConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public SpringResourceTemplateResolver templateResolver() {
-        SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
+    @Description("Thymeleaf template resolver serving HTML 5")
+    public ClassLoaderTemplateResolver templateResolver() {
 
-        templateResolver.setApplicationContext(applicationContext);
-        templateResolver.setPrefix("/WEB-INF/views/");
+        var templateResolver = new ClassLoaderTemplateResolver();
+
+        templateResolver.setPrefix("templates/");
+        templateResolver.setCacheable(false);
         templateResolver.setSuffix(".html");
+        templateResolver.setTemplateMode("HTML5");
+        templateResolver.setCharacterEncoding("UTF-8");
 
         return templateResolver;
     }
 
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        ThymeleafViewResolver resolver = new ThymeleafViewResolver();
+    @Bean
+    @Description("Thymeleaf template engine with Spring integration")
+    public SpringTemplateEngine templateEngine() {
 
-        resolver.setTemplateEngine(templateEngineWithDate());
-        registry.viewResolver(resolver);
+        var templateEngine = new SpringTemplateEngine();
+        templateEngine.setTemplateResolver(templateResolver());
+
+        return templateEngine;
     }
 
-    private ISpringTemplateEngine templateEngineWithDate() {
-        SpringTemplateEngine engine = new SpringTemplateEngine();
+    @Bean
+    @Description("Thymeleaf view resolver")
+    public ViewResolver viewResolver() {
 
-        engine.addDialect(new Java8TimeDialect());
-        engine.setTemplateResolver(templateResolver());
+        var viewResolver = new ThymeleafViewResolver();
 
-        return engine;
+        viewResolver.setTemplateEngine(templateEngine());
+        viewResolver.setCharacterEncoding("UTF-8");
+
+        return viewResolver;
     }
+
 
 }

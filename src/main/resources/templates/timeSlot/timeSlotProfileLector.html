@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet"
+          id="bootstrap-css">
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+</head>
+<body>
+<br><br>
+<div class="container-fluid well span6">
+    <div class="row-fluid">
+
+        <div class="span8" th:o#object="${timeSlot}">
+            <div th:if="${timeSlot}">
+                <h3>Lector</h3>
+                <h4 th:text="${timeSlot.getLessonDto().getLector().getFirstName()}"/>
+                <h4 th:text="${timeSlot.getLessonDto().getLector().getLastName()}"/>
+                <h4 th:text="${#temporals.format(timeSlot.getStartLesson(), 'dd-MM-yyyy, HH:mm')}"/>
+                <h4 th:text="${#temporals.format(timeSlot.getEndLesson(), 'dd-MM-yyyy, HH:mm')}"/>
+                <h5>Old experienced: 1 Year</h5>
+                <h5><a href="https://www.java.com/ru/">More... </a></h5>
+            </div>
+        </div>
+        <div th:unless="${timeSlot}">
+            <h3>No such id</h3>
+        </div>
+    </div>
+
+    <div class="span2">
+        <div class="btn-group">
+            <a class="btn dropdown-toggle btn-info" data-toggle="dropdown" href="#">
+                Action
+                <span class="icon-cog icon-white"></span><span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="#"><span class="icon-wrench"></span> Modify</a></li>
+                <li><a href="#"><span class="icon-trash"></span> Delete</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
+
