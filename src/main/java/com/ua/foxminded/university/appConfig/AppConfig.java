@@ -104,14 +104,13 @@ public class AppConfig implements WebMvcConfigurer {
         return templateResolver;
     }
 
-    @Bean
-    @Description("Thymeleaf template engine with Spring integration")
-    public SpringTemplateEngine templateEngine() {
+    private ISpringTemplateEngine templateEngineWithDate() {
+        SpringTemplateEngine engine = new SpringTemplateEngine();
 
-        var templateEngine = new SpringTemplateEngine();
-        templateEngine.setTemplateResolver(templateResolver());
+        engine.addDialect(new Java8TimeDialect());
+        engine.setTemplateResolver(templateResolver());
 
-        return templateEngine;
+        return engine;
     }
 
     @Bean
@@ -120,11 +119,13 @@ public class AppConfig implements WebMvcConfigurer {
 
         var viewResolver = new ThymeleafViewResolver();
 
-        viewResolver.setTemplateEngine(templateEngine());
+        viewResolver.setTemplateEngine(templateEngineWithDate());
         viewResolver.setCharacterEncoding("UTF-8");
 
         return viewResolver;
     }
+
+
 
 
 }
