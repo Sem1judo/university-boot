@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 
 @Entity
@@ -98,13 +99,14 @@ public class TimeSlot implements Serializable {
         this.group = group;
     }
 
+    public void setLesson(Lesson lesson) {
+        this.lesson = lesson;
+    }
+
     public Lesson getLesson() {
         return lesson;
     }
 
-    public void setLesson(Lesson lesson) {
-        this.lesson = lesson;
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -1,6 +1,7 @@
 package com.ua.foxminded.university.services;
 
 
+import com.ua.foxminded.university.dao.DaoEntity;
 import com.ua.foxminded.university.dao.impl.FacultyDaoImpl;
 import com.ua.foxminded.university.exceptions.ServiceException;
 import com.ua.foxminded.university.model.Faculty;
@@ -8,6 +9,7 @@ import com.ua.foxminded.university.validation.ValidatorEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -22,7 +24,8 @@ import java.util.List;
 public class FacultyServices {
 
     @Autowired
-    private FacultyDaoImpl facultyDao;
+    @Qualifier("facultyDaoImpl")
+    private DaoEntity<Faculty> facultyDao;
 
     @Autowired
     private ValidatorEntity<Faculty> validator;

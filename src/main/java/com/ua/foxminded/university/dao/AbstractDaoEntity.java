@@ -1,55 +1,43 @@
 package com.ua.foxminded.university.dao;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.util.List;
 
 
+
 public abstract class AbstractDaoEntity<T extends Serializable> {
-    private Class<T> clazz;
+    private Class< T > clazz;
 
-    @Autowired
-    private SessionFactory sessionFactory;
+    @PersistenceContext
+    EntityManager entityManager;
 
-    public void setClazz( Class<T> clazzToSet) {
-        clazz = clazzToSet;
+    public void setClazz( Class< T > clazzToSet ) {
+        this.clazz = clazzToSet;
     }
 
-    public T getById(long id) {
-        return (T) getCurrentSession().get(clazz, id);
+    public T getById( long id ){
+        return entityManager.find( clazz, id );
+    }
+    public List< T > getAll(){
+        return entityManager.createQuery( "from " + clazz.getName() )
+                .getResultList();
     }
 
-    public List getAll() {
-        return getCurrentSession().createQuery("from " + clazz.getName()).list();
+    public void create( T entity ){
+        entityManager.persist( entity );
     }
 
-//    public List<T> getAll() {
-//        CriteriaQuery<T> query = getCurrentSession().getCriteriaBuilder().createQuery(clazz);
-//        query.select(query.from(clazz));
-//        return getCurrentSession().createQuery(query).getResultList();
-//    }
-
-    public void create( T entity) {
-        getCurrentSession().saveOrUpdate(entity);
+    public void update( T entity ){
+        entityManager.merge( entity );
     }
 
-    public T update( T entity) {
-        return (T) getCurrentSession().merge(entity);
+    public void delete( T entity ){
+        entityManager.remove( entity );
     }
-
-    public void delete(T entity) {
-        getCurrentSession().delete(entity);
-    }
-
-    public void deleteById( long id) {
-        final T entity = getById(id);
-        delete(entity);
-    }
-
-    protected final Session getCurrentSession() {
-        return sessionFactory.getCurrentSession();
+    public void deleteById( long entityId ){
+        T entity = getById( entityId );
+        delete( entity );
     }
 }

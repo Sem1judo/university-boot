@@ -12,7 +12,7 @@ public interface DaoEntity<T extends Serializable> {
 
     void create( T entity);
 
-    T update( T entity);
+    void update( T entity);
 
     void delete( T entity);
 

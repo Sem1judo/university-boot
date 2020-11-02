@@ -1,6 +1,7 @@
 package com.ua.foxminded.university.services;
 
 
+import com.ua.foxminded.university.dao.DaoEntity;
 import com.ua.foxminded.university.dao.impl.*;
 import com.ua.foxminded.university.dto.GroupDto;
 import com.ua.foxminded.university.dto.LectorDto;
@@ -12,6 +13,7 @@ import com.ua.foxminded.university.validation.ValidatorEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -27,15 +29,25 @@ import java.util.List;
 public class TimeSlotServices {
 
     @Autowired
-    private TimeSlotDaoImpl timeSlotDao;
+    @Qualifier("timeSlotDaoImpl")
+    private DaoEntity<TimeSlot> timeSlotDao;
+
     @Autowired
-    private LessonDaoImpl lessonDao;
+    @Qualifier("lessonDaoImpl")
+    private DaoEntity<Lesson> lessonDao;
+
     @Autowired
-    private LectorDaoImpl lectorDao;
+    @Qualifier("lectorDaoImpl")
+    private DaoEntity<Lector> lectorDao;
+
     @Autowired
-    private FacultyDaoImpl facultyDao;
+    @Qualifier("facultyDaoImpl")
+    private DaoEntity<Faculty> facultyDao;
+
     @Autowired
-    private GroupDaoImpl groupDao;
+    @Qualifier("groupDaoImpl")
+    private DaoEntity<Group> groupDao;
+
     @Autowired
     private ValidatorEntity<TimeSlot> validator;
 
