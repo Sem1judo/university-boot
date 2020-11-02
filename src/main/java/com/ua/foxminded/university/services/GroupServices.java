@@ -1,8 +1,7 @@
 package com.ua.foxminded.university.services;
 
-import com.ua.foxminded.university.dao.DaoEntity;
-import com.ua.foxminded.university.dao.impl.FacultyDaoImpl;
-import com.ua.foxminded.university.dao.impl.GroupDaoImpl;
+import com.ua.foxminded.university.dao.impl.FacultyRepositoryImpl;
+import com.ua.foxminded.university.dao.impl.GroupRepositoryImpl;
 import com.ua.foxminded.university.dto.GroupDto;
 import com.ua.foxminded.university.exceptions.ServiceException;
 import com.ua.foxminded.university.model.Faculty;
@@ -11,7 +10,6 @@ import com.ua.foxminded.university.validation.ValidatorEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -26,12 +24,10 @@ import java.util.List;
 public class GroupServices {
 
     @Autowired
-    @Qualifier("groupDaoImpl")
-    private DaoEntity<Group> groupDao;
+    private GroupRepositoryImpl groupDao;
 
     @Autowired
-    @Qualifier("facultyDaoImpl")
-    private DaoEntity<Faculty> facultyDao;
+    private FacultyRepositoryImpl facultyDao;
 
     @Autowired
     private ValidatorEntity<Group> validator;
@@ -44,8 +40,8 @@ public class GroupServices {
 
     private GroupDto getDtoById(Long id) {
 
-        Group group = groupDao.getById(id);
-        Faculty faculty = facultyDao.getById(group.getGroupId());
+        Group group = groupDao.findById(id).orElseThrow(() -> new NoSuchEntityException("Invalid groupd ID"));
+        Faculty faculty = facultyDao.findById(group.getFaculty().getFacultyId()).orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
         GroupDto groupDto = new GroupDto();
         groupDto.setGroupId(group.getGroupId());
@@ -56,7 +52,7 @@ public class GroupServices {
     }
 
     private List<GroupDto> getAllDto() {
-        List<Group> groups = groupDao.getAll();
+        List<Group> groups = groupDao.findAll();
         List<GroupDto> groupDtos = new ArrayList<>();
 
         GroupDto groupDto;
@@ -64,8 +60,8 @@ public class GroupServices {
 
         for (Group group : groups) {
 
-            group = groupDao.getById(group.getGroupId());
-            faculty = facultyDao.getById(group.getFaculty().getFacultyId());
+            group = groupDao.findById(group.getGroupId()).orElseThrow(() -> new NoSuchEntityException("Invalid groupd ID"));;;
+            faculty = facultyDao.findById(group.getFaculty().getFacultyId()).orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
             groupDto = new GroupDto();
             groupDto.setGroupId(group.getGroupId());
@@ -121,7 +117,7 @@ public class GroupServices {
         }
         Group group;
         try {
-            group = groupDao.getById(id);
+            group = groupDao.findById(id).orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing group with id={}", id);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -136,7 +132,7 @@ public class GroupServices {
         logger.debug("Trying to get all groups");
 
         try {
-            return groupDao.getAll();
+            return groupDao.findAll();
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Groups is not exist");
             throw new NoSuchEntityException("Doesn't exist such groups");
@@ -150,12 +146,12 @@ public class GroupServices {
         logger.debug("Trying to create group: {}", group);
         logger.debug("Trying to get faculty By Id with id: {}", facultyId);
 
-        Faculty faculty = facultyDao.getById(facultyId);
+        Faculty faculty = facultyDao.findById(facultyId).orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
         group.setFaculty(faculty);
 
         validator.validate(group);
         try {
-            groupDao.create(group);
+            groupDao.save(group);
         } catch (DataAccessException e) {
             logger.error("Failed to create group: {}", group, e);
             throw new ServiceException("Failed to create group", e);
@@ -210,12 +206,13 @@ public class GroupServices {
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
 
-        Faculty faculty = facultyDao.getById(facultyId);
+        Faculty faculty = facultyDao.findById(facultyId)
+                .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
         group.setFaculty(faculty);
 
         validator.validate(group);
         try {
-            groupDao.getById(group.getGroupId());
+            groupDao.findById(group.getGroupId());
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing group: {}", group);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -225,7 +222,7 @@ public class GroupServices {
         }
 
         try {
-            groupDao.update(group);
+            groupDao.save(group);
         } catch (DataAccessException e) {
             logger.error("Failed to update group: {}", group);
             throw new ServiceException("Problem with updating group");

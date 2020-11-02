@@ -1,15 +1,13 @@
 package com.ua.foxminded.university.services;
 
 
-import com.ua.foxminded.university.dao.DaoEntity;
-import com.ua.foxminded.university.dao.impl.FacultyDaoImpl;
+import com.ua.foxminded.university.dao.impl.FacultyRepositoryImpl;
 import com.ua.foxminded.university.exceptions.ServiceException;
 import com.ua.foxminded.university.model.Faculty;
 import com.ua.foxminded.university.validation.ValidatorEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -24,8 +22,7 @@ import java.util.List;
 public class FacultyServices {
 
     @Autowired
-    @Qualifier("facultyDaoImpl")
-    private DaoEntity<Faculty> facultyDao;
+    private FacultyRepositoryImpl facultyDao;
 
     @Autowired
     private ValidatorEntity<Faculty> validator;
@@ -38,7 +35,7 @@ public class FacultyServices {
     public List<Faculty> getAll() {
         logger.debug("Trying to get all faculties");
         try {
-            return facultyDao.getAll();
+            return facultyDao.findAll();
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Faculties is not exist");
             throw new NoSuchEntityException("Doesn't exist such faculties");
@@ -53,7 +50,7 @@ public class FacultyServices {
 
         validator.validate(faculty);
         try {
-             facultyDao.create(faculty);
+             facultyDao.save(faculty);
         } catch (DataAccessException e) {
             logger.error("Failed to create faculty: {}", faculty, e);
             throw new ServiceException("Failed to create faculty", e);
@@ -104,7 +101,8 @@ public class FacultyServices {
         }
         Faculty faculty;
         try {
-            faculty = facultyDao.getById(id);
+            faculty = facultyDao.findById(id)
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing faculty with id={}", id);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -124,7 +122,7 @@ public class FacultyServices {
         }
         validator.validate(faculty);
         try {
-            facultyDao.getById(faculty.getFacultyId());
+            facultyDao.findById(faculty.getFacultyId());
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing faculty: {}", faculty);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -133,7 +131,7 @@ public class FacultyServices {
             throw new ServiceException("Failed to retrieve faculty: ", e);
         }
         try {
-             facultyDao.update(faculty);
+             facultyDao.save(faculty);
         } catch (DataAccessException e) {
             logger.error("Failed to update faculty: {}", faculty);
             throw new ServiceException("Problem with updating faculty");

@@ -1,7 +1,6 @@
 package com.ua.foxminded.university.services;
 
 
-import com.ua.foxminded.university.dao.DaoEntity;
 import com.ua.foxminded.university.dao.impl.*;
 import com.ua.foxminded.university.dto.GroupDto;
 import com.ua.foxminded.university.dto.LectorDto;
@@ -13,7 +12,6 @@ import com.ua.foxminded.university.validation.ValidatorEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -29,24 +27,19 @@ import java.util.List;
 public class TimeSlotServices {
 
     @Autowired
-    @Qualifier("timeSlotDaoImpl")
-    private DaoEntity<TimeSlot> timeSlotDao;
+    private TimeSlotRepositoryImpl timeSlotDao;
 
     @Autowired
-    @Qualifier("lessonDaoImpl")
-    private DaoEntity<Lesson> lessonDao;
+    private LessonRepositoryImpl lessonDao;
 
     @Autowired
-    @Qualifier("lectorDaoImpl")
-    private DaoEntity<Lector> lectorDao;
+    private LectorRepositoryImpl lectorDao;
 
     @Autowired
-    @Qualifier("facultyDaoImpl")
-    private DaoEntity<Faculty> facultyDao;
+    private FacultyRepositoryImpl facultyDao;
 
     @Autowired
-    @Qualifier("groupDaoImpl")
-    private DaoEntity<Group> groupDao;
+    private GroupRepositoryImpl groupDao;
 
     @Autowired
     private ValidatorEntity<TimeSlot> validator;
@@ -60,12 +53,18 @@ public class TimeSlotServices {
 
     private TimeSlotDto getDtoById(Long id) {
 
-        TimeSlot timeSlot = timeSlotDao.getById(id);
+        TimeSlot timeSlot = timeSlotDao.findById(id)
+                .orElseThrow(() -> new NoSuchEntityException("Invalid time slot ID"));
 
-        Group group = groupDao.getById(timeSlot.getGroup().getGroupId());
-        Lesson lesson = lessonDao.getById(timeSlot.getLesson().getLessonId());
-        Lector lector = lectorDao.getById(lesson.getLector().getLectorId());
-        Faculty faculty = facultyDao.getById(lector.getFaculty().getFacultyId());
+        Group group = groupDao.findById(timeSlot.getGroup().getGroupId())
+                .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
+        Lesson lesson = lessonDao.findById(timeSlot.getLesson().getLessonId())
+                .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
+        Lector lector = lectorDao.findById(lesson.getLector().getLectorId())
+                .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
+        Faculty faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
+                .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
+
 
         GroupDto groupDto = new GroupDto();
         groupDto.setGroupId(group.getGroupId());
@@ -95,7 +94,7 @@ public class TimeSlotServices {
 
     private List<TimeSlotDto> getAllDto() {
 
-        List<TimeSlot> timeSlots = timeSlotDao.getAll();
+        List<TimeSlot> timeSlots = timeSlotDao.findAll();
         List<TimeSlotDto> timeSlotDtos = new ArrayList<>();
 
         Group group;
@@ -110,10 +109,15 @@ public class TimeSlotServices {
 
         for (TimeSlot timeSlot : timeSlots) {
 
-            group = groupDao.getById(timeSlot.getGroup().getGroupId());
-            lesson = lessonDao.getById(timeSlot.getLesson().getLessonId());
-            lector = lectorDao.getById(lesson.getLector().getLectorId());
-            faculty = facultyDao.getById(lector.getFaculty().getFacultyId());
+            group = groupDao.findById(timeSlot.getGroup().getGroupId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
+            lesson = lessonDao.findById(timeSlot.getLesson().getLessonId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
+            lector = lectorDao.findById(lesson.getLector().getLectorId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
+            faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
+
 
             groupDto = new GroupDto();
             groupDto.setGroupId(group.getGroupId());
@@ -186,7 +190,8 @@ public class TimeSlotServices {
         }
         TimeSlot timeSlot;
         try {
-            timeSlot = timeSlotDao.getById(id);
+            timeSlot = timeSlotDao.findById(id)
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid time slot ID"));;
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing time slot with id={}", id);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -200,7 +205,7 @@ public class TimeSlotServices {
     public List<TimeSlot> getAllLight() {
         logger.debug("Trying to get all time slots");
         try {
-            return timeSlotDao.getAll();
+            return timeSlotDao.findAll();
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Time slots is not exist");
             throw new NoSuchEntityException("Doesn't exist such time slots");
@@ -215,8 +220,10 @@ public class TimeSlotServices {
         logger.debug("Trying to get lesson By Id with id: {}", lessonId);
         logger.debug("Trying to get group By Id with id: {}", groupId);
 
-        Group group = groupDao.getById(groupId);
-        Lesson lesson = lessonDao.getById(lessonId);
+        Group group = groupDao.findById(groupId)
+                .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
+        Lesson lesson = lessonDao.findById(lessonId)
+                .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
 
         timeSlot.setLesson(lesson);
         timeSlot.setGroup(group);
@@ -224,7 +231,7 @@ public class TimeSlotServices {
         validator.validate(timeSlot);
         try {
 
-            timeSlotDao.create(timeSlot);
+            timeSlotDao.save(timeSlot);
         } catch (DataAccessException e) {
             logger.error("Failed to create time slot: {}", timeSlot, e);
             throw new ServiceException("Failed to create time slot", e);
@@ -277,15 +284,17 @@ public class TimeSlotServices {
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
 
-        Group group = groupDao.getById(groupId);
-        Lesson lesson = lessonDao.getById(lessonId);
+        Group group = groupDao.findById(groupId)
+                .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
+        Lesson lesson = lessonDao.findById(lessonId)
+                .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
 
         timeSlot.setLesson(lesson);
         timeSlot.setGroup(group);
 
         validator.validate(timeSlot);
         try {
-            timeSlotDao.getById(timeSlot.getTimeSlotId());
+          timeSlotDao.findById(timeSlot.getTimeSlotId());
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing time slot: {}", timeSlot);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -294,7 +303,7 @@ public class TimeSlotServices {
             throw new ServiceException("Failed to retrieve time slot:", e);
         }
         try {
-            timeSlotDao.update(timeSlot);
+            timeSlotDao.save(timeSlot);
         } catch (DataAccessException e) {
             logger.error("Failed to update time slot: {}", timeSlot, e);
             throw new ServiceException("Problem with updating time slot");
