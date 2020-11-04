@@ -191,7 +191,8 @@ public class TimeSlotServices {
         TimeSlot timeSlot;
         try {
             timeSlot = timeSlotDao.findById(id)
-                    .orElseThrow(() -> new NoSuchEntityException("Invalid time slot ID"));;
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid time slot ID"));
+            ;
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing time slot with id={}", id);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -220,13 +221,8 @@ public class TimeSlotServices {
         logger.debug("Trying to get lesson By Id with id: {}", lessonId);
         logger.debug("Trying to get group By Id with id: {}", groupId);
 
-        Group group = groupDao.findById(groupId)
-                .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
-        Lesson lesson = lessonDao.findById(lessonId)
-                .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
-
-        timeSlot.setLesson(lesson);
-        timeSlot.setGroup(group);
+        getGroup(timeSlot, groupId);
+        getLesson(timeSlot, lessonId);
 
         validator.validate(timeSlot);
         try {
@@ -284,17 +280,12 @@ public class TimeSlotServices {
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
 
-        Group group = groupDao.findById(groupId)
-                .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
-        Lesson lesson = lessonDao.findById(lessonId)
-                .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
-
-        timeSlot.setLesson(lesson);
-        timeSlot.setGroup(group);
+        getGroup(timeSlot, groupId);
+        getLesson(timeSlot, lessonId);
 
         validator.validate(timeSlot);
         try {
-          timeSlotDao.findById(timeSlot.getTimeSlotId());
+            timeSlotDao.findById(timeSlot.getTimeSlotId());
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing time slot: {}", timeSlot);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -307,6 +298,28 @@ public class TimeSlotServices {
         } catch (DataAccessException e) {
             logger.error("Failed to update time slot: {}", timeSlot, e);
             throw new ServiceException("Problem with updating time slot");
+        }
+    }
+
+    private void getGroup(TimeSlot timeSlot, long groupId) {
+        try {
+            Group group = groupDao.findById(groupId)
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
+            timeSlot.setGroup(group);
+        } catch (NoSuchEntityException e) {
+            logger.error("Failed to retrieve cause Invalid group ID: {}", groupId);
+            throw new ServiceException("Failed to retrieve group from such id: ", e);
+        }
+    }
+
+    private void getLesson(TimeSlot timeSlot, long lessonId) {
+        try {
+            Lesson lesson = lessonDao.findById(lessonId)
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
+            timeSlot.setLesson(lesson);
+        } catch (NoSuchEntityException e) {
+            logger.error("Failed to retrieve cause Invalid lesson ID: {}", lessonId);
+            throw new ServiceException("Failed to retrieve lesson from such id: ", e);
         }
     }
 }

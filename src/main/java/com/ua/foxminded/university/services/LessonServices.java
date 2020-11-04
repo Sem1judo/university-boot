@@ -179,9 +179,7 @@ public class LessonServices {
         logger.debug("Trying to get lector By Id with id: {}", lectorId);
 
 
-            Lector lector = lectorDao.findById(lectorId)
-                    .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-            lesson.setLector(lector);
+        getLector(lesson,lectorId);
 
         validator.validate(lesson);
         try {
@@ -239,9 +237,7 @@ public class LessonServices {
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
 
-            Lector lector = lectorDao.findById(lectorId)
-                    .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-            lesson.setLector(lector);
+        getLector(lesson,lectorId);
 
         validator.validate(lesson);
         try {
@@ -258,6 +254,16 @@ public class LessonServices {
         } catch (DataAccessException e) {
             logger.error("failed to update lesson: {}", lesson, e);
             throw new ServiceException("Problem with updating lesson");
+        }
+    }
+    private void getLector(Lesson lesson, long lectorId) {
+        try {
+            Lector lector = lectorDao.findById(lectorId)
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
+            lesson.setLector(lector);
+        } catch (NoSuchEntityException e) {
+            logger.error("Failed to retrieve cause Invalid lector ID: {}", lectorId);
+            throw new ServiceException("Failed to retrieve lector from such id: ", e);
         }
     }
 }

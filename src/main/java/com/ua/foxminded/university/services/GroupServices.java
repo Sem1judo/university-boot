@@ -40,8 +40,10 @@ public class GroupServices {
 
     private GroupDto getDtoById(Long id) {
 
-        Group group = groupDao.findById(id).orElseThrow(() -> new NoSuchEntityException("Invalid groupd ID"));
-        Faculty faculty = facultyDao.findById(group.getFaculty().getFacultyId()).orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
+        Group group = groupDao.findById(id)
+                .orElseThrow(() -> new NoSuchEntityException("Invalid groupd ID"));
+        Faculty faculty = facultyDao.findById(group.getFaculty().getFacultyId())
+                .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
         GroupDto groupDto = new GroupDto();
         groupDto.setGroupId(group.getGroupId());
@@ -60,8 +62,10 @@ public class GroupServices {
 
         for (Group group : groups) {
 
-            group = groupDao.findById(group.getGroupId()).orElseThrow(() -> new NoSuchEntityException("Invalid groupd ID"));;;
-            faculty = facultyDao.findById(group.getFaculty().getFacultyId()).orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
+            group = groupDao.findById(group.getGroupId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid groupd ID"));
+            faculty = facultyDao.findById(group.getFaculty().getFacultyId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
             groupDto = new GroupDto();
             groupDto.setGroupId(group.getGroupId());
@@ -146,8 +150,7 @@ public class GroupServices {
         logger.debug("Trying to create group: {}", group);
         logger.debug("Trying to get faculty By Id with id: {}", facultyId);
 
-        Faculty faculty = facultyDao.findById(facultyId).orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
-        group.setFaculty(faculty);
+        getFaculty(group, facultyId);
 
         validator.validate(group);
         try {
@@ -157,6 +160,7 @@ public class GroupServices {
             throw new ServiceException("Failed to create group", e);
         }
     }
+
 
     public void deleteById(long id) {
         logger.debug("Trying to delete group with id={}", id);
@@ -200,15 +204,12 @@ public class GroupServices {
         logger.debug("Trying to get faculty By Id with id: {}", facultyId);
 
 
-
         if (group.getGroupId() == 0) {
             logger.warn(MISSING_ID_ERROR_MESSAGE);
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
 
-        Faculty faculty = facultyDao.findById(facultyId)
-                .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
-        group.setFaculty(faculty);
+        getFaculty(group, facultyId);
 
         validator.validate(group);
         try {
@@ -226,6 +227,17 @@ public class GroupServices {
         } catch (DataAccessException e) {
             logger.error("Failed to update group: {}", group);
             throw new ServiceException("Problem with updating group");
+        }
+    }
+
+    private void getFaculty(Group group, long facultyId) {
+        try {
+            Faculty faculty = facultyDao.findById(facultyId)
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
+            group.setFaculty(faculty);
+        } catch (NoSuchEntityException e) {
+            logger.error("Failed to retrieve cause Invalid faculty ID: {}", facultyId);
+            throw new ServiceException("Failed to retrieve faculty from such id: ", e);
         }
     }
 
