@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ejb.NoSuchEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -112,6 +113,7 @@ public class GroupServices {
         return group;
     }
 
+
     public Group getByIdLight(long id) {
         logger.debug("Trying to get group with id={}", id);
 
@@ -130,6 +132,24 @@ public class GroupServices {
             throw new ServiceException("Failed to retrieve group by id", e);
         }
         return group;
+    }
+
+    public Optional<Group> findById(long id) {
+        logger.debug("Trying to get group with id={}", id);
+
+        if (id == 0) {
+            logger.warn(MISSING_ID_ERROR_MESSAGE);
+            throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
+        }
+        try {
+            return groupDao.findById(id);
+        } catch (EmptyResultDataAccessException e) {
+            logger.warn("Not existing group with id={}", id);
+            throw new NoSuchEntityException(NOT_EXIST_ENTITY);
+        } catch (DataAccessException e) {
+            logger.error("Failed to retrieve group with id={}", id, e);
+            throw new ServiceException("Failed to retrieve group by id", e);
+        }
     }
 
     public List<Group> getAllLight() {
@@ -161,6 +181,20 @@ public class GroupServices {
         }
     }
 
+    public Group save(Group group, long facultyId) {
+        logger.debug("Trying to create group: {}", group);
+        logger.debug("Trying to get faculty By Id with id: {}", facultyId);
+
+        getFaculty(group, facultyId);
+
+        validator.validate(group);
+        try {
+            return groupDao.save(group);
+        } catch (DataAccessException e) {
+            logger.error("Failed to create group: {}", group, e);
+            throw new ServiceException("Failed to create group", e);
+        }
+    }
 
     public void deleteById(long id) {
         logger.debug("Trying to delete group with id={}", id);

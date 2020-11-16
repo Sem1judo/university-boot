@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ejb.NoSuchEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -66,8 +67,13 @@ public class LectorServices {
 
         for (Lector lector : lectors) {
 
-            lector = lectorDao.getOne(lector.getLectorId());
-            faculty = facultyDao.getOne(lector.getFaculty().getFacultyId());
+            lector = lectorDao.findById(lector.getLectorId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
+            ;
+            faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
+                    .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
+            ;
+            ;
 
             lectorDto = new LectorDto();
             lectorDto.setLectorId(lector.getLectorId());
@@ -137,6 +143,25 @@ public class LectorServices {
         return lector;
     }
 
+    public Optional<Lector> findById(long id) {
+        logger.debug("Trying to get lector with id={}", id);
+
+        if (id == 0) {
+            logger.warn(MISSING_ID_ERROR_MESSAGE);
+            throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
+        }
+
+        try {
+            return lectorDao.findById(id);
+        } catch (EmptyResultDataAccessException e) {
+            logger.warn("Not existing lector with id={}", id);
+            throw new NoSuchEntityException(NOT_EXIST_ENTITY);
+        } catch (DataAccessException e) {
+            logger.error("failed to retrieve lector with id={}", id, e);
+            throw new ServiceException("Failed to retrieve lector by such id: ", e);
+        }
+    }
+
     public List<Lector> getAllLight() {
         logger.debug("Trying to get all lectors");
         try {
@@ -159,6 +184,23 @@ public class LectorServices {
         validator.validate(lector);
         try {
             lectorDao.save(lector);
+        } catch (
+                DataAccessException e) {
+            logger.error("failed to create lector: {}", lector, e);
+            throw new ServiceException("Failed to create lector", e);
+        }
+
+    }
+
+    public Lector save(Lector lector, long facultyId) {
+        logger.debug("Trying to create lector: {}", lector);
+        logger.debug("Trying to get facultyById with id: {}", facultyId);
+
+        getFaculty(lector, facultyId);
+
+        validator.validate(lector);
+        try {
+            return lectorDao.save(lector);
         } catch (
                 DataAccessException e) {
             logger.error("failed to create lector: {}", lector, e);

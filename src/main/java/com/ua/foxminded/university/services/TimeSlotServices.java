@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ejb.NoSuchEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -203,6 +204,25 @@ public class TimeSlotServices {
         return timeSlot;
     }
 
+    public Optional<TimeSlot> findById(long id) {
+        logger.debug("Trying to get time slot with id={}", id);
+
+        if (id == 0) {
+            logger.warn(MISSING_ID_ERROR_MESSAGE);
+            throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
+        }
+
+        try {
+            return timeSlotDao.findById(id);
+        } catch (EmptyResultDataAccessException e) {
+            logger.warn("Not existing time slot with id={}", id);
+            throw new NoSuchEntityException(NOT_EXIST_ENTITY);
+        } catch (DataAccessException e) {
+            logger.error("Failed to retrieve time slot with id={}", id, e);
+            throw new ServiceException("Failed to retrieve time slot by id", e);
+        }
+    }
+
     public List<TimeSlot> getAllLight() {
         logger.debug("Trying to get all time slots");
         try {
@@ -228,6 +248,24 @@ public class TimeSlotServices {
         try {
 
             timeSlotDao.save(timeSlot);
+        } catch (DataAccessException e) {
+            logger.error("Failed to create time slot: {}", timeSlot, e);
+            throw new ServiceException("Failed to create time slot", e);
+        }
+    }
+
+    public TimeSlot save(TimeSlot timeSlot, long lessonId, long groupId) {
+        logger.debug("Trying to create time slot: {}", timeSlot);
+        logger.debug("Trying to get lesson By Id with id: {}", lessonId);
+        logger.debug("Trying to get group By Id with id: {}", groupId);
+
+        getGroup(timeSlot, groupId);
+        getLesson(timeSlot, lessonId);
+
+        validator.validate(timeSlot);
+        try {
+
+            return timeSlotDao.save(timeSlot);
         } catch (DataAccessException e) {
             logger.error("Failed to create time slot: {}", timeSlot, e);
             throw new ServiceException("Failed to create time slot", e);

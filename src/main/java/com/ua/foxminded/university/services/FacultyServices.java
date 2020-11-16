@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.ejb.NoSuchEntityException;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -35,7 +36,7 @@ public class FacultyServices {
     public List<Faculty> getAll() {
         logger.debug("Trying to get all faculties");
         try {
-            return facultyDao.findAll();
+            return (List<Faculty>) facultyDao.findAll();
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Faculties is not exist");
             throw new NoSuchEntityException("Doesn't exist such faculties");
@@ -50,7 +51,18 @@ public class FacultyServices {
 
         validator.validate(faculty);
         try {
-             facultyDao.save(faculty);
+           facultyDao.save(faculty);
+        } catch (DataAccessException e) {
+            logger.error("Failed to create faculty: {}", faculty, e);
+            throw new ServiceException("Failed to create faculty", e);
+        }
+    }
+    public Faculty save(Faculty faculty) {
+        logger.debug("Trying to create faculty: {}", faculty);
+
+        validator.validate(faculty);
+        try {
+            return facultyDao.save(faculty);
         } catch (DataAccessException e) {
             logger.error("Failed to create faculty: {}", faculty, e);
             throw new ServiceException("Failed to create faculty", e);
@@ -111,6 +123,23 @@ public class FacultyServices {
             throw new ServiceException("Failed to retrieve faculty with such id", e);
         }
         return faculty;
+    }
+    public Optional<Faculty> findById(long id) {
+        logger.debug("Trying to get faculty with id={}", id);
+
+        if (id == 0) {
+            logger.warn(MISSING_ID_ERROR_MESSAGE);
+            throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
+        }
+        try {
+          return facultyDao.findById(id);
+        } catch (EmptyResultDataAccessException e) {
+            logger.warn("Not existing faculty with id={}", id);
+            throw new NoSuchEntityException(NOT_EXIST_ENTITY);
+        } catch (DataAccessException e) {
+            logger.error("Failed to retrieve faculty with id={}", id, e);
+            throw new ServiceException("Failed to retrieve faculty with such id", e);
+        }
     }
 
     public void update(Faculty faculty) {

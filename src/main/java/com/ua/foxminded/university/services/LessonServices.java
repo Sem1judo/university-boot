@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.ejb.NoSuchEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -159,6 +160,26 @@ public class LessonServices {
         return lesson;
     }
 
+    public Optional<Lesson> findById(long id) {
+        logger.debug("Trying to get lesson with id={}", id);
+
+        if (id == 0) {
+            logger.warn(MISSING_ID_ERROR_MESSAGE);
+            throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
+        }
+
+        try {
+            return lessonDao.findById(id);
+
+        } catch (EmptyResultDataAccessException e) {
+            logger.warn("Not existing lesson with id={}", id);
+            throw new NoSuchEntityException(NOT_EXIST_ENTITY);
+        } catch (DataAccessException e) {
+            logger.error("failed to retrieve lesson with id={}", id, e);
+            throw new ServiceException("Failed to retrieve lesson by id", e);
+        }
+    }
+
     public List<Lesson> getAllLight() {
         logger.debug("Trying to get all lessons");
 
@@ -179,11 +200,26 @@ public class LessonServices {
         logger.debug("Trying to get lector By Id with id: {}", lectorId);
 
 
-        getLector(lesson,lectorId);
+        getLector(lesson, lectorId);
 
         validator.validate(lesson);
         try {
             lessonDao.save(lesson);
+        } catch (DataAccessException e) {
+            logger.error("Failed to create lesson: {}", lesson, e);
+            throw new ServiceException("Failed to create lesson", e);
+        }
+    }
+
+    public Lesson save(Lesson lesson, long lectorId) {
+        logger.debug("Trying to create lesson: {}", lesson);
+        logger.debug("Trying to get lector By Id with id: {}", lectorId);
+
+        getLector(lesson, lectorId);
+
+        validator.validate(lesson);
+        try {
+            return lessonDao.save(lesson);
         } catch (DataAccessException e) {
             logger.error("Failed to create lesson: {}", lesson, e);
             throw new ServiceException("Failed to create lesson", e);
@@ -237,7 +273,7 @@ public class LessonServices {
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
 
-        getLector(lesson,lectorId);
+        getLector(lesson, lectorId);
 
         validator.validate(lesson);
         try {
@@ -256,6 +292,7 @@ public class LessonServices {
             throw new ServiceException("Problem with updating lesson");
         }
     }
+
     private void getLector(Lesson lesson, long lectorId) {
         try {
             Lector lector = lectorDao.findById(lectorId)
