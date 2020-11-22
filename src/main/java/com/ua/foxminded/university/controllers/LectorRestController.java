@@ -84,7 +84,7 @@ public class LectorRestController {
                 .body(entityModel);
     }
 
-    @DeleteMapping("/restLector/{lectorId}")
+    @DeleteMapping("/restLectors/{lectorId}")
     ResponseEntity<?> deleteLector(@PathVariable Long lectorId) {
 
         lectorServices.deleteById(lectorId);

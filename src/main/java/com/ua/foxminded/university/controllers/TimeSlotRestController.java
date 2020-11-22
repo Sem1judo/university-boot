@@ -64,7 +64,7 @@ public class TimeSlotRestController {
         return assembler.toModel(timeSlot);
     }
 
-    @PutMapping("/restLectors/{timeSlotId}")
+    @PutMapping("/restTimeSlots/{timeSlotId}")
     ResponseEntity<?> replaceLector(@RequestBody TimeSlot timeSlot,@PathVariable Long timeSlotId, @RequestParam Long lessonId, @RequestParam Long groupId) {
 
         TimeSlot updatedTimeSlot = timeSlotServices.findById(timeSlotId). //
@@ -85,7 +85,7 @@ public class TimeSlotRestController {
                 .body(entityModel);
     }
 
-    @DeleteMapping("/restLectors/{timeSlotId}")
+    @DeleteMapping("/restTimeSlots/{timeSlotId}")
     ResponseEntity<?> deleteTimeSlot(@PathVariable Long timeSlotId) {
 
         timeSlotServices.deleteById(timeSlotId);
