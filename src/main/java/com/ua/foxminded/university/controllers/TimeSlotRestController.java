@@ -47,7 +47,7 @@ public class TimeSlotRestController {
     }
 
     @PostMapping("/restTimeSlots")
-    ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot, @RequestBody Long lessonId, @RequestBody Long groupId) {
+    ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot, @RequestParam Long lessonId, @RequestParam Long groupId) {
 
         EntityModel<TimeSlot> timeSlotEntityModel = assembler.toModel(timeSlotServices.save(timeSlot, lessonId, groupId));
 
@@ -65,7 +65,7 @@ public class TimeSlotRestController {
     }
 
     @PutMapping("/restLectors/{timeSlotId}")
-    ResponseEntity<?> replaceLector(@RequestBody TimeSlot timeSlot,@PathVariable Long timeSlotId, @RequestBody Long lessonId, @RequestBody Long groupId) {
+    ResponseEntity<?> replaceLector(@RequestBody TimeSlot timeSlot,@PathVariable Long timeSlotId, @RequestParam Long lessonId, @RequestParam Long groupId) {
 
         TimeSlot updatedTimeSlot = timeSlotServices.findById(timeSlotId). //
                 map(timeSlotInternal -> {

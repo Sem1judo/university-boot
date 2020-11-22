@@ -46,7 +46,7 @@ public class LectorRestController {
     }
 
     @PostMapping("/restLectors")
-    ResponseEntity<?> newLector(@RequestBody Lector group, @RequestBody Long facultyId) {
+    ResponseEntity<?> newLector(@RequestBody Lector group, @RequestParam Long facultyId) {
 
         EntityModel<Lector> entityModel = assembler.toModel(lectorServices.save(group, facultyId));
 
@@ -64,7 +64,7 @@ public class LectorRestController {
     }
 
     @PutMapping("/restLectors/{lectorId}")
-    ResponseEntity<?> replaceLector(@RequestBody Lector lector, @PathVariable Long lectorId, @RequestBody Long facultyId) {
+    ResponseEntity<?> replaceLector(@RequestBody Lector lector, @PathVariable Long lectorId, @RequestParam Long facultyId) {
 
         Lector updatedLector = lectorServices.findById(lectorId). //
                 map(groupInternal -> {

@@ -46,7 +46,7 @@ public class LessonRestController {
     }
 
     @PostMapping("/restLessons")
-    ResponseEntity<?> newLesson(@RequestBody Lesson lesson, @RequestBody Long lectorId) {
+    ResponseEntity<?> newLesson(@RequestBody Lesson lesson, @RequestParam Long lectorId) {
 
         EntityModel<Lesson> entityModel = assembler.toModel(lessonServices.save(lesson, lectorId));
 
@@ -64,7 +64,7 @@ public class LessonRestController {
     }
 
     @PutMapping("/restLessons/{lessonId}")
-    ResponseEntity<?> replaceLesson(@RequestBody Lesson lesson, @PathVariable Long lessonId, @RequestBody Long lectorId) {
+    ResponseEntity<?> replaceLesson(@RequestBody Lesson lesson, @PathVariable Long lessonId,@RequestParam Long lectorId) {
 
         Lesson updatedLesson = lessonServices.findById(lessonId). //
                 map(lessonInternal -> {

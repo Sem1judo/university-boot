@@ -2,6 +2,7 @@ package com.ua.foxminded.university.controllers;
 
 
 import com.ua.foxminded.university.controllers.modelAssembler.FacultyModelAssembler;
+import com.ua.foxminded.university.dao.impl.FacultyRepositoryImpl;
 import com.ua.foxminded.university.model.Faculty;
 import com.ua.foxminded.university.services.FacultyServices;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class FacultyRestController {
 
     private static final Logger logger = LoggerFactory.getLogger(FacultyController.class);
+
 
 
     @Autowired

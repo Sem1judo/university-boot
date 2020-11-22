@@ -48,7 +48,7 @@ public class GroupRestController {
     }
 
     @PostMapping("/restGroups")
-    ResponseEntity<?> newGroup(@RequestBody Group group, @RequestBody Long facultyId) {
+        ResponseEntity<?> newGroup(@RequestBody Group group, @RequestParam Long facultyId) {
 
         EntityModel<Group> entityModel = assembler.toModel(groupServices.save(group, facultyId));
 
@@ -66,7 +66,7 @@ public class GroupRestController {
     }
 
     @PutMapping("/restGroups/{groupId}")
-    ResponseEntity<?> replaceGroup(@RequestBody Group group, @PathVariable Long groupId, @RequestBody Long facultyId) {
+    ResponseEntity<?> replaceGroup(@RequestBody Group group, @PathVariable Long groupId, @RequestParam Long facultyId) {
 
         Group updatedGroup = groupServices.findById(groupId). //
                 map(groupInternal -> {
