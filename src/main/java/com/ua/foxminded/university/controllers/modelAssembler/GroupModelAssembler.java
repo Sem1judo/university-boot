@@ -1,7 +1,5 @@
 package com.ua.foxminded.university.controllers.modelAssembler;
 
-import com.ua.foxminded.university.controllers.FacultyRestController;
-
 import com.ua.foxminded.university.controllers.GroupRestController;
 import com.ua.foxminded.university.model.Group;
 import org.springframework.hateoas.EntityModel;

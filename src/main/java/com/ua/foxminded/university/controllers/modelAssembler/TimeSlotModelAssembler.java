@@ -1,8 +1,6 @@
 package com.ua.foxminded.university.controllers.modelAssembler;
 
-import com.ua.foxminded.university.controllers.FacultyRestController;
 import com.ua.foxminded.university.controllers.TimeSlotRestController;
-import com.ua.foxminded.university.model.Faculty;
 import com.ua.foxminded.university.model.TimeSlot;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
