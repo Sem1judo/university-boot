@@ -1,5 +1,6 @@
 package com.ua.foxminded.university.controllers.modelAssembler;
 
+import com.ua.foxminded.university.controllers.FacultyRestController;
 import com.ua.foxminded.university.model.Faculty;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -14,7 +15,7 @@ public class FacultyModelAssembler implements RepresentationModelAssembler<Facul
     @Override
     public EntityModel<Faculty> toModel(Faculty faculty) {
 
-        return EntityModel.of(faculty, //
+        return EntityModel.of(faculty,
                 linkTo(methodOn(FacultyRestController.class).one(faculty.getFacultyId())).withSelfRel(),
                 linkTo(methodOn(FacultyRestController.class).all()).withRel("restFaculties"));
     }
