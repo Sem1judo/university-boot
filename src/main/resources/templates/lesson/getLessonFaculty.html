@@ -14,15 +14,14 @@
 <div class="container-fluid well span6">
     <div class="row-fluid">
 
-        <div class="span8" th:class="${lectorFaculty}? 'No such ID'">
-            <div th:if="${lectorFaculty}">
+        <div class="span8" th:o#object="${lessonFaculty}">
+            <div th:if="${lessonFaculty}">
                 <h2>Faculty </h2>
-                <h3 th:text="${lectorFaculty.getFirstName()}"/>
-                <h3 th:text="${lectorFaculty.getLastName()}"/>
+                <h3 th:text="${lessonFaculty.getFaculty().getName()}"/>
                 <h5><a href="https://www.java.com/ru/">More... </a></h5>
             </div>
         </div>
-        <div th:unless="${lectorFaculty}">
+        <div th:unless="${lessonFaculty}">
             <h3>No such id</h3>
         </div>
     </div>
@@ -40,6 +39,6 @@
         </div>
     </div>
 </div>
-</div>
 </body>
 </html>
+

@@ -21,10 +21,6 @@ public class Lector implements Serializable {
     private long lectorId;
 
 
-    @ManyToOne
-    @JoinColumn(name = "faculty_id")
-    private Faculty faculty;
-
     @NotBlank(message = "First name may not be blank")
     @Size(min = 2, max = 50,
             message = "First name must be between 2 and 50 characters long")
@@ -56,13 +52,13 @@ public class Lector implements Serializable {
     }
 
 
-    public Lector(long lectorId, Faculty faculty, @NotBlank @Size(min = 3, max = 50,
+    public Lector(long lectorId, @NotBlank @Size(min = 3, max = 50,
             message = "First name must be between 3 and 20 characters long") @Pattern(regexp = "^[a-zA-Z0-9]+$",
             message = "First name must be alphanumeric with no spaces") String firstName, @NotBlank @Size(min = 3, max = 50,
             message = "Last name must be between 3 and 20 characters long") @Pattern(regexp = "^[a-zA-Z0-9]+$",
             message = "Last name must be alphanumeric with no spaces") String lastName) {
         this.lectorId = lectorId;
-        this.faculty = faculty;
+
         this.firstName = firstName;
         this.lastName = lastName;
     }
@@ -92,13 +88,7 @@ public class Lector implements Serializable {
         this.lastName = lastName;
     }
 
-    public Faculty getFaculty() {
-        return faculty;
-    }
 
-    public void setFaculty(Faculty faculty) {
-        this.faculty = faculty;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -106,21 +96,19 @@ public class Lector implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Lector lector = (Lector) o;
         return lectorId == lector.lectorId &&
-                Objects.equals(faculty, lector.faculty) &&
                 Objects.equals(firstName, lector.firstName) &&
                 Objects.equals(lastName, lector.lastName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lectorId, faculty, firstName, lastName);
+        return Objects.hash(lectorId,  firstName, lastName);
     }
 
     @Override
     public String toString() {
         return "Lector{" +
                 "lectorId=" + lectorId +
-                ", faculty=" + faculty.getName() +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';

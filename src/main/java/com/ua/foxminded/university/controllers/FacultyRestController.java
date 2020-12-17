@@ -36,6 +36,11 @@ public class FacultyRestController {
     private FacultyServices facultyServices;
 
 
+    @GetMapping("/restFacultiesE")
+    List<Faculty> allF() {
+        return facultyServices.getAll();
+    }
+
     @GetMapping("/restFaculties")
     public CollectionModel<EntityModel<Faculty>> all() {
 

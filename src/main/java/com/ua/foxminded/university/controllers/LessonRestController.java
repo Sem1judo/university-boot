@@ -46,9 +46,9 @@ public class LessonRestController {
     }
 
     @PostMapping("/restLessons")
-    ResponseEntity<?> newLesson(@RequestBody Lesson lesson, @RequestParam Long lectorId) {
+    ResponseEntity<?> newLesson(@RequestBody Lesson lesson, @RequestParam Long lectorId, @RequestParam Long facultyId) {
 
-        EntityModel<Lesson> entityModel = assembler.toModel(lessonServices.save(lesson, lectorId));
+        EntityModel<Lesson> entityModel = assembler.toModel(lessonServices.save(lesson, lectorId,facultyId));
 
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -64,16 +64,19 @@ public class LessonRestController {
     }
 
     @PutMapping("/restLessons/{lessonId}")
-    ResponseEntity<?> replaceLesson(@RequestBody Lesson lesson, @PathVariable Long lessonId,@RequestParam Long lectorId) {
+    ResponseEntity<?> replaceLesson(@RequestBody Lesson lesson, @PathVariable Long lessonId,
+                                    @RequestParam Long lectorId,
+                                    @RequestParam Long facultyId) {
 
         Lesson updatedLesson = lessonServices.findById(lessonId). //
                 map(lessonInternal -> {
             lessonInternal.setName(lesson.getName());
-            return lessonServices.save(lessonInternal, lectorId);
+            return lessonServices.save(lessonInternal, lectorId,facultyId);
         })
                 .orElseGet(() -> {
                     lesson.setLessonId(lessonId);
-                    return lessonServices.save(lesson, lesson.getLector().getLectorId());
+                    return lessonServices.save(lesson, lesson.getLector().getLectorId()
+                            ,lesson.getFaculty().getFacultyId());
                 });
 
         EntityModel<Lesson> entityModel = assembler.toModel(updatedLesson);

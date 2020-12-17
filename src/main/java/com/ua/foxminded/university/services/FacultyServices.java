@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.ejb.NoSuchEntityException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,8 +36,14 @@ public class FacultyServices {
 
     public List<Faculty> getAll() {
         logger.debug("Trying to get all faculties");
+
         try {
-            return (List<Faculty>) facultyDao.findAll();
+            var it = facultyDao.findAll();
+
+            var faculties = new ArrayList<Faculty>();
+            it.forEach(faculties::add);
+
+            return faculties;
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Faculties is not exist");
             throw new NoSuchEntityException("Doesn't exist such faculties");
@@ -51,12 +58,13 @@ public class FacultyServices {
 
         validator.validate(faculty);
         try {
-           facultyDao.save(faculty);
+            facultyDao.save(faculty);
         } catch (DataAccessException e) {
             logger.error("Failed to create faculty: {}", faculty, e);
             throw new ServiceException("Failed to create faculty", e);
         }
     }
+
     public Faculty save(Faculty faculty) {
         logger.debug("Trying to create faculty: {}", faculty);
 
@@ -77,7 +85,7 @@ public class FacultyServices {
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
         try {
-             facultyDao.deleteById(id);
+            facultyDao.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing faculty with id={}", id);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -86,6 +94,7 @@ public class FacultyServices {
             throw new ServiceException("Failed to delete faculty by id", e);
         }
     }
+
     public void delete(Faculty faculty) {
         logger.debug("Trying to delete faculty = {}", faculty);
 
@@ -124,6 +133,7 @@ public class FacultyServices {
         }
         return faculty;
     }
+
     public Optional<Faculty> findById(long id) {
         logger.debug("Trying to get faculty with id={}", id);
 
@@ -132,7 +142,7 @@ public class FacultyServices {
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
         try {
-          return facultyDao.findById(id);
+            return facultyDao.findById(id);
         } catch (EmptyResultDataAccessException e) {
             logger.warn("Not existing faculty with id={}", id);
             throw new NoSuchEntityException(NOT_EXIST_ENTITY);
@@ -160,7 +170,7 @@ public class FacultyServices {
             throw new ServiceException("Failed to retrieve faculty: ", e);
         }
         try {
-             facultyDao.save(faculty);
+            facultyDao.save(faculty);
         } catch (DataAccessException e) {
             logger.error("Failed to update faculty: {}", faculty);
             throw new ServiceException("Problem with updating faculty");

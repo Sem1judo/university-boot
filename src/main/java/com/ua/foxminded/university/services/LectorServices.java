@@ -1,12 +1,9 @@
 package com.ua.foxminded.university.services;
 
-import com.ua.foxminded.university.dao.impl.FacultyRepositoryImpl;
+
 import com.ua.foxminded.university.dao.impl.LectorRepositoryImpl;
-import com.ua.foxminded.university.dao.impl.LessonRepositoryImpl;
 import com.ua.foxminded.university.dto.LectorDto;
 import com.ua.foxminded.university.exceptions.ServiceException;
-import com.ua.foxminded.university.model.Faculty;
-import com.ua.foxminded.university.model.Group;
 import com.ua.foxminded.university.model.Lector;
 import com.ua.foxminded.university.validation.ValidatorEntity;
 import org.slf4j.Logger;
@@ -30,8 +27,6 @@ public class LectorServices {
     @Autowired
     private LectorRepositoryImpl lectorDao;
 
-    @Autowired
-    private FacultyRepositoryImpl facultyDao;
 
     @Autowired
     private ValidatorEntity<Lector> validator;
@@ -46,12 +41,9 @@ public class LectorServices {
 
         Lector lector = lectorDao.findById(id)
                 .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-        Faculty faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
-                .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
         LectorDto lectorDto = new LectorDto();
         lectorDto.setLectorId(lector.getLectorId());
-        lectorDto.setFaculty(faculty);
         lectorDto.setFirstName(lector.getFirstName());
         lectorDto.setLastName(lector.getLastName());
 
@@ -63,21 +55,15 @@ public class LectorServices {
         List<LectorDto> lectorDtos = new ArrayList<>();
 
         LectorDto lectorDto;
-        Faculty faculty;
 
         for (Lector lector : lectors) {
 
             lector = lectorDao.findById(lector.getLectorId())
                     .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-            ;
-            faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
-                    .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
-            ;
-            ;
+
 
             lectorDto = new LectorDto();
             lectorDto.setLectorId(lector.getLectorId());
-            lectorDto.setFaculty(faculty);
             lectorDto.setFirstName(lector.getFirstName());
             lectorDto.setLastName(lector.getLastName());
 
@@ -175,11 +161,8 @@ public class LectorServices {
         }
     }
 
-    public void create(Lector lector, long facultyId) {
+    public void create(Lector lector) {
         logger.debug("Trying to create lector: {}", lector);
-        logger.debug("Trying to get facultyById with id: {}", facultyId);
-
-        getFaculty(lector, facultyId);
 
         validator.validate(lector);
         try {
@@ -192,11 +175,8 @@ public class LectorServices {
 
     }
 
-    public Lector save(Lector lector, long facultyId) {
+    public Lector save(Lector lector) {
         logger.debug("Trying to create lector: {}", lector);
-        logger.debug("Trying to get facultyById with id: {}", facultyId);
-
-        getFaculty(lector, facultyId);
 
         validator.validate(lector);
         try {
@@ -245,16 +225,14 @@ public class LectorServices {
         }
     }
 
-    public void update(Lector lector, long facultyId) {
+    public void update(Lector lector) {
         logger.debug("Trying to update lector: {}", lector);
-        logger.debug("Trying to get faculty By Id with id: {}", facultyId);
 
         if (lector.getLectorId() == 0) {
             logger.warn(MISSING_ID_ERROR_MESSAGE);
             throw new ServiceException(MISSING_ID_ERROR_MESSAGE);
         }
 
-        getFaculty(lector, facultyId);
 
         validator.validate(lector);
         try {
@@ -272,18 +250,6 @@ public class LectorServices {
         } catch (DataAccessException e) {
             logger.error("Failed to update lector: {}", lector, e);
             throw new ServiceException("Problem with updating lector");
-        }
-    }
-
-
-    private void getFaculty(Lector lector, long facultyId) {
-        try {
-            Faculty faculty = facultyDao.findById(facultyId)
-                    .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
-            lector.setFaculty(faculty);
-        } catch (NoSuchEntityException e) {
-            logger.error("Failed to retrieve cause Invalid faculty ID: {}", facultyId);
-            throw new ServiceException("Failed to retrieve faculty from such id: ", e);
         }
     }
 

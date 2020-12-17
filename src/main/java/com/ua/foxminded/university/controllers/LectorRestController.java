@@ -46,9 +46,9 @@ public class LectorRestController {
     }
 
     @PostMapping("/restLectors")
-    ResponseEntity<?> newLector(@RequestBody Lector group, @RequestParam Long facultyId) {
+    ResponseEntity<?> newLector(@RequestBody Lector group) {
 
-        EntityModel<Lector> entityModel = assembler.toModel(lectorServices.save(group, facultyId));
+        EntityModel<Lector> entityModel = assembler.toModel(lectorServices.save(group));
 
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -64,17 +64,17 @@ public class LectorRestController {
     }
 
     @PutMapping("/restLectors/{lectorId}")
-    ResponseEntity<?> replaceLector(@RequestBody Lector lector, @PathVariable Long lectorId, @RequestParam Long facultyId) {
+    ResponseEntity<?> replaceLector(@RequestBody Lector lector, @PathVariable Long lectorId) {
 
         Lector updatedLector = lectorServices.findById(lectorId). //
-                map(groupInternal -> {
-            groupInternal.setFirstName(lector.getFirstName());
-            groupInternal.setLastName(lector.getLastName());
-            return lectorServices.save(groupInternal, facultyId);
+                map(lectorInternal -> {
+            lectorInternal.setFirstName(lector.getFirstName());
+            lectorInternal.setLastName(lector.getLastName());
+            return lectorServices.save(lectorInternal);
         })
                 .orElseGet(() -> {
                     lector.setLectorId(lectorId);
-                    return lectorServices.save(lector, lector.getFaculty().getFacultyId());
+                    return lectorServices.save(lector);
                 });
 
         EntityModel<Lector> entityModel = assembler.toModel(updatedLector);
