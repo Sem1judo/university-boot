@@ -19,6 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,17 +43,63 @@ class FacultyControllerIntegrationTest {
     private FacultyServices facultyServices;
 
 
-    @Test
-    public void shouldPutFacultyWhenGiveAppropriateFaculty() throws Exception {
 
-        Faculty faculty = new Faculty("testF");
+
+    @Test
+    public void shouldGetListOfFaculties() throws Exception {
+
+
+        List<Faculty> faculties = facultyServices.getAll();
+        Faculty facultyZero = faculties.get(0);
+        Faculty facultyFirst = faculties.get(1);
+
+
+        mockMvc.perform(get("/restFaculties"))
+                .andExpect(status().isOk())
+                .andExpect(faculty("$[0]", facultyZero))
+                .andExpect(faculty("$[1]", facultyFirst));
+
+    }
+
+    @Test
+    public void shouldGetFacultyByIdWhenGivenId() throws Exception {
+
+        mockMvc.perform(get("/restFaculties/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("ITSchool"));
+
+        Faculty facultyEntity = facultyServices.getById(1);
+        assertThat(facultyEntity.getName()).isEqualTo("ITSchool");
+
+    }
+
+
+    @Test
+    public void shouldPutAndCreateFacultyWhenGiveAppropriateFaculty() throws Exception {
+
+        Faculty faculty = new Faculty("ITSchool");
 
         mockMvc.perform(putJson("/restFaculties/1", faculty))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(faculty("$", faculty));
 
         Faculty facultyEntity = facultyServices.getById(1);
-        assertThat(facultyEntity.getName()).isEqualTo("testF");
+        assertThat(facultyEntity.getName()).isEqualTo("ITSchool");
+
+    }
+
+    @Test
+    public void shouldUpdateFacultyWhenGiveAppropriateFaculty() throws Exception {
+
+        Faculty faculty = facultyServices.getById(2);
+        faculty.setName("newOne");
+
+        mockMvc.perform(postJson("/restFaculties/2", faculty))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(faculty("$", faculty));
+
+        Faculty facultyEntity = facultyServices.getById(1);
+        assertThat(facultyEntity.getName()).isEqualTo("newOne");
 
     }
 
@@ -61,14 +109,22 @@ class FacultyControllerIntegrationTest {
 
     }
 
-    public ResultMatcher noCacheHeader() {
-        return header().string("Cache-Control", "no-cache");
-    }
 
     public static MockHttpServletRequestBuilder putJson(String uri, Object body) {
         try {
             String json = new ObjectMapper().writeValueAsString(body);
             return put(uri)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .content(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static MockHttpServletRequestBuilder postJson(String uri, Object body) {
+        try {
+            String json = new ObjectMapper().writeValueAsString(body);
+            return post(uri)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .content(json);
