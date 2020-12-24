@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -43,32 +44,31 @@ class FacultyControllerIntegrationTest {
     private FacultyServices facultyServices;
 
 
-
-
     @Test
     public void shouldGetListOfFaculties() throws Exception {
-
-
         List<Faculty> faculties = facultyServices.getAll();
-        Faculty facultyZero = faculties.get(0);
-        Faculty facultyFirst = faculties.get(1);
+        Faculty secondF = faculties.get(0);
+        Faculty iTSchool = faculties.get(1);
 
 
         mockMvc.perform(get("/restFaculties"))
                 .andExpect(status().isOk())
-                .andExpect(faculty("$[0]", facultyZero))
-                .andExpect(faculty("$[1]", facultyFirst));
+                .andExpect(faculty("$..faculty[0]", secondF))
+                .andExpect(faculty("$..faculty[1]", iTSchool));
 
     }
 
     @Test
     public void shouldGetFacultyByIdWhenGivenId() throws Exception {
 
-        mockMvc.perform(get("/restFaculties/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("ITSchool"));
 
         Faculty facultyEntity = facultyServices.getById(1);
+
+        mockMvc.perform(get("/restFaculties/1"))
+                .andExpect(status().isOk())
+                .andExpect(faculty("$",facultyEntity));
+
+
         assertThat(facultyEntity.getName()).isEqualTo("ITSchool");
 
     }

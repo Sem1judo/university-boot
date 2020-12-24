@@ -22,7 +22,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class LectorRestController {
-    private static final Logger logger = LoggerFactory.getLogger(FacultyController.class);
+    private static final Logger logger = LoggerFactory.getLogger(LectorRestController.class);
 
 
     @Autowired
