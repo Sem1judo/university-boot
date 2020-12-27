@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
+
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.time.LocalDateTime;
@@ -51,8 +51,8 @@ class TimeSlotRestControllerTest {
 
         mockMvc.perform(get("/restTimeSlots"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.timeSlots[0].startLesson").value("2021-10-13T15:00:00"))
-                .andExpect(jsonPath("$.timeSlots[0].endLesson").value("2021-10-13T17:00:00"));
+                .andExpect(jsonPath("$.timeSlots[0].startLesson").value("2021-10-13 15:00:00"))
+                .andExpect(jsonPath("$.timeSlots[0].endLesson").value("2021-10-13 17:00:00"));
 
 
     }
@@ -64,8 +64,8 @@ class TimeSlotRestControllerTest {
 
         mockMvc.perform(get("/restTimeSlots/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.startLesson").value("2021-10-13T15:00:00"))
-                .andExpect(jsonPath("$.endLesson").value("2021-10-13T17:00:00"));
+                .andExpect(jsonPath("$.startLesson").value("2021-10-13 15:00:00"))
+                .andExpect(jsonPath("$.endLesson").value("2021-10-13 17:00:00"));
 
 
         assertThat(timeSlotEntity.getStartLesson())
