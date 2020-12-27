@@ -2,8 +2,8 @@ package com.ua.foxminded.university.controllers;
 
 
 import com.ua.foxminded.university.controllers.modelAssembler.FacultyModelAssembler;
-import com.ua.foxminded.university.dao.impl.FacultyRepositoryImpl;
 import com.ua.foxminded.university.model.Faculty;
+import com.ua.foxminded.university.model.Wrappers.FacultyWrapper;
 import com.ua.foxminded.university.services.FacultyServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +36,10 @@ public class FacultyRestController {
     private FacultyServices facultyServices;
 
 
-    @GetMapping("/restFacultiesE")
-    List<Faculty> allF() {
-        return facultyServices.getAll();
-    }
 
-    @GetMapping("/restFaculties")
-    public CollectionModel<EntityModel<Faculty>> all() {
+
+    @GetMapping("/restFacultiesWithHref")
+    public CollectionModel<EntityModel<Faculty>> allWithRef() {
 
         List<EntityModel<Faculty>> faculties = facultyServices.getAll().stream()
                 .map(assembler::toModel)
@@ -50,6 +47,15 @@ public class FacultyRestController {
 
         return CollectionModel.of(faculties,
                 linkTo(methodOn(FacultyRestController.class).all()).withSelfRel());
+    }
+    @GetMapping("/restFaculties")
+    @ResponseBody
+    public FacultyWrapper all() {
+        List<Faculty> faculties = facultyServices.getAll();
+        FacultyWrapper wrapper = new FacultyWrapper();
+        wrapper.setFaculties(faculties);
+
+        return wrapper;
     }
 
     @PostMapping("/restFaculties")
@@ -97,5 +103,7 @@ public class FacultyRestController {
 
         return ResponseEntity.noContent().build();
     }
+
+
 
 }

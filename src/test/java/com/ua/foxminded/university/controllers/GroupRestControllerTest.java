@@ -1,16 +1,16 @@
 package com.ua.foxminded.university.controllers;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ua.foxminded.university.UniversityBootApplication;
 import com.ua.foxminded.university.model.Faculty;
+import com.ua.foxminded.university.model.Group;
 import com.ua.foxminded.university.services.FacultyServices;
+import com.ua.foxminded.university.services.GroupServices;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -22,17 +22,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.MOCK, classes = UniversityBootApplication.class)
 @AutoConfigureMockMvc
 @TestPropertySource(
         locations = "classpath:testDB.properties")
-class FacultyControllerIntegrationTest {
+class GroupRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,65 +40,72 @@ class FacultyControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private GroupServices groupServices;
+    @Autowired
     private FacultyServices facultyServices;
 
-    @Test
-    public void shouldGetListOfFaculties() throws Exception {
-        List<Faculty> faculties = facultyServices.getAll();
-        Faculty secondF = faculties.get(0);
-        Faculty iTSchool = faculties.get(1);
 
-        mockMvc.perform(get("/restFaculties"))
+    @Test
+    public void shouldGetListOfGroups() throws Exception {
+        List<Group> groups = groupServices.getAllLight();
+        Group ft14 = groups.get(0);
+        Group fk233 = groups.get(1);
+
+
+        mockMvc.perform(get("/restGroups"))
                 .andExpect(status().isOk())
-                .andExpect(faculty("$.faculties[0]", secondF))
-                .andExpect(faculty("$.faculties[1]", iTSchool));
+                .andExpect(group("$.groups[0]", ft14))
+                .andExpect(group("$.groups[1]", fk233));
 
     }
 
     @Test
-    public void shouldGetFacultyByIdWhenGivenId() throws Exception {
+    public void shouldGetGroupByIdWhenGivenId() throws Exception {
 
-        Faculty facultyEntity = facultyServices.getById(1);
 
-        mockMvc.perform(get("/restFaculties/1"))
+        Group groupEntity = groupServices.getByIdLight(1);
+
+        mockMvc.perform(get("/restGroups/1"))
                 .andExpect(status().isOk())
-                .andExpect(faculty("$",facultyEntity));
+                .andExpect(group("$",groupEntity));
 
-        assertThat(facultyEntity.getName()).isEqualTo("ITSchool");
+        assertThat(groupEntity.getName()).isEqualTo("FT-14");
 
     }
+
 
     @Test
-    public void shouldUpdateAndPutFacultyWhenGiveAppropriateFaculty() throws Exception {
+    public void shouldUpdateAndPutGroupWhenGiveAppropriateGroup() throws Exception {
 
-        Faculty faculty = facultyServices.getById(7);
+        Group group = groupServices.getByIdLight(3);
 
-        faculty.setName("TestOne");
+        group.setName("testName");
 
-        mockMvc.perform(putJson("/restFaculties/7", faculty))
+        mockMvc.perform(putJson("/restGroups/3", group)
+                .param("facultyId","1"))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(faculty("$", faculty));
+                .andExpect(group("$", group));
 
-        Faculty facultyEntity = facultyServices.getById(7);
-        assertThat(facultyEntity.getName()).isEqualTo("TestOne");
+        Group groupEntity = groupServices.getByIdLight(3);
+        assertThat(groupEntity.getName()).isEqualTo("testName");
 
     }
-
     @Test
-    public void shouldCreateFacultyWhenGiveAppropriateFaculty() throws Exception {
+    public void shouldCreateGroupWhenGiveAppropriateGroup() throws Exception {
 
-        Faculty faculty = new Faculty();
-        faculty.setName("newOne");
+        Group group = new Group();
+        group.setName("newOne");
 
-        mockMvc.perform(postJson("/restFaculties", faculty))
+        mockMvc.perform(postJson("/restGroups", group)
+                .param("facultyId","1"))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(faculty("$", faculty));
+                .andExpect(group("$", group));
 
     }
 
-    public static ResultMatcher faculty(String prefix, Faculty faculty) {
+    public static ResultMatcher group(String prefix, Group group) {
         return ResultMatcher.matchAll(
-                jsonPath(prefix + ".name").value(faculty.getName()));
+                jsonPath(prefix + ".name").value(group.getName()));
 
     }
 
@@ -126,6 +132,4 @@ class FacultyControllerIntegrationTest {
             throw new RuntimeException(e);
         }
     }
-
 }
-

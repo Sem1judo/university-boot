@@ -17,6 +17,6 @@ public class FacultyModelAssembler implements RepresentationModelAssembler<Facul
 
         return EntityModel.of(faculty,
                 linkTo(methodOn(FacultyRestController.class).one(faculty.getFacultyId())).withSelfRel(),
-                linkTo(methodOn(FacultyRestController.class).all()).withRel("restFaculties"));
+                linkTo(methodOn(FacultyRestController.class).allWithRef()).withRel("restFacultiesWithHref"));
     }
 }

@@ -19,6 +19,6 @@ public class LessonModelAssembler implements RepresentationModelAssembler<Lesson
 
         return EntityModel.of(lesson, //
                 linkTo(methodOn(LessonRestController.class).one(lesson.getLessonId())).withSelfRel(),
-                linkTo(methodOn(LessonRestController.class).all()).withRel("restGroups"));
+                linkTo(methodOn(LessonRestController.class).allWithHref()).withRel("restLessonsWithHref"));
     }
 }

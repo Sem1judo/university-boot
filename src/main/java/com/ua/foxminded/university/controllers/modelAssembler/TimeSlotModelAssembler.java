@@ -17,6 +17,6 @@ public class TimeSlotModelAssembler implements RepresentationModelAssembler<Time
 
         return EntityModel.of(timeSlot, //
                 linkTo(methodOn(TimeSlotRestController.class).one(timeSlot.getTimeSlotId())).withSelfRel(),
-                linkTo(methodOn(TimeSlotRestController.class).all()).withRel("restFaculties"));
+                linkTo(methodOn(TimeSlotRestController.class).allWithHref()).withRel("restTimeSlotsWithHref"));
     }
 }

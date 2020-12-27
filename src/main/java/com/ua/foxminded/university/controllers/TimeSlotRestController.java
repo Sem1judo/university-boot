@@ -3,7 +3,10 @@ package com.ua.foxminded.university.controllers;
 
 import com.ua.foxminded.university.controllers.modelAssembler.TimeSlotModelAssembler;
 
+import com.ua.foxminded.university.model.Lesson;
 import com.ua.foxminded.university.model.TimeSlot;
+import com.ua.foxminded.university.model.Wrappers.LessonWrapper;
+import com.ua.foxminded.university.model.Wrappers.TimeSlotWrapper;
 import com.ua.foxminded.university.services.TimeSlotServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +38,8 @@ public class TimeSlotRestController {
     private TimeSlotServices timeSlotServices;
 
 
-    @GetMapping("/restTimeSlots")
-    public CollectionModel<EntityModel<TimeSlot>> all() {
+    @GetMapping("/restTimeSlotsWithHref")
+    public CollectionModel<EntityModel<TimeSlot>> allWithHref() {
 
         List<EntityModel<TimeSlot>> timeSlots = timeSlotServices.getAllLight().stream()
                 .map(assembler::toModel)
@@ -45,9 +48,20 @@ public class TimeSlotRestController {
         return CollectionModel.of(timeSlots,
                 linkTo(methodOn(TimeSlotRestController.class).all()).withSelfRel());
     }
+    @GetMapping("/restTimeSlots")
+    @ResponseBody
+    public TimeSlotWrapper all() {
+        List<TimeSlot> timeSlots = timeSlotServices.getAllLight();
+        TimeSlotWrapper wrapper = new TimeSlotWrapper();
+        wrapper.setTimeSlots(timeSlots);
+
+        return wrapper;
+    }
 
     @PostMapping("/restTimeSlots")
-    ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot, @RequestParam Long lessonId, @RequestParam Long groupId) {
+    ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot
+            , @RequestParam Long lessonId
+            , @RequestParam Long groupId) {
 
         EntityModel<TimeSlot> timeSlotEntityModel = assembler.toModel(timeSlotServices.save(timeSlot, lessonId, groupId));
 
@@ -65,7 +79,10 @@ public class TimeSlotRestController {
     }
 
     @PutMapping("/restTimeSlots/{timeSlotId}")
-    ResponseEntity<?> replaceLector(@RequestBody TimeSlot timeSlot,@PathVariable Long timeSlotId, @RequestParam Long lessonId, @RequestParam Long groupId) {
+    ResponseEntity<?> replaceLector(@RequestBody TimeSlot timeSlot,
+                                    @PathVariable Long timeSlotId,
+                                    @RequestParam Long lessonId,
+                                    @RequestParam Long groupId) {
 
         TimeSlot updatedTimeSlot = timeSlotServices.findById(timeSlotId). //
                 map(timeSlotInternal -> {

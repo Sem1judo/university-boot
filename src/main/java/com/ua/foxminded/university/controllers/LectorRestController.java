@@ -3,6 +3,8 @@ package com.ua.foxminded.university.controllers;
 import com.ua.foxminded.university.controllers.modelAssembler.LectorModelAssembler;
 import com.ua.foxminded.university.model.Group;
 import com.ua.foxminded.university.model.Lector;
+import com.ua.foxminded.university.model.Wrappers.GroupWrapper;
+import com.ua.foxminded.university.model.Wrappers.LectorWrapper;
 import com.ua.foxminded.university.services.LectorServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +36,8 @@ public class LectorRestController {
     private LectorServices lectorServices;
 
 
-    @GetMapping("/restLectors")
-    public CollectionModel<EntityModel<Lector>> all() {
+    @GetMapping("/restLectorsWithHref")
+    public CollectionModel<EntityModel<Lector>> allWithHref() {
 
         List<EntityModel<Lector>> lectors = lectorServices.getAllLight().stream()
                 .map(assembler::toModel)
@@ -43,6 +45,16 @@ public class LectorRestController {
 
         return CollectionModel.of(lectors,
                 linkTo(methodOn(LectorRestController.class).all()).withSelfRel());
+    }
+
+    @GetMapping("/restLectors")
+    @ResponseBody
+    public LectorWrapper all() {
+        List<Lector> lectors = lectorServices.getAllLight();
+        LectorWrapper wrapper = new LectorWrapper();
+        wrapper.setLectors(lectors);
+
+        return wrapper;
     }
 
     @PostMapping("/restLectors")

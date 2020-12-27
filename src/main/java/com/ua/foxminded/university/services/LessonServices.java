@@ -221,7 +221,7 @@ public class LessonServices {
         logger.debug("Trying to get faculty By Id with id: {}", facultyId);
 
         getLector(lesson, lectorId);
-        getLector(lesson, facultyId);
+        getFaculty(lesson, facultyId);
 
         validator.validate(lesson);
         try {

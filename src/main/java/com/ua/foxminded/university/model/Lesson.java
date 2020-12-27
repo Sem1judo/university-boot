@@ -40,6 +40,11 @@ public class Lesson implements Serializable {
     public Lesson() {
     }
 
+    public Lesson(@NotBlank(message = "Lesson name may not be blank") @Size(min = 2, max = 50,
+            message = "Lesson name must be between 2 and 50 characters long") @Pattern(regexp = "^[a-zA-Z0-9]+$",
+            message = "Lesson name must be alphanumeric with no spaces") String name) {
+        this.name = name;
+    }
 
     public Lesson(long lessonId, @NotBlank @Size(min = 3, max = 50,
             message = "Lesson name must be between 3 and 20 characters long") @Pattern(regexp = "^[a-zA-Z0-9]+$",
