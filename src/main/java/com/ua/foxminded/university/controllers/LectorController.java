@@ -51,13 +51,13 @@ public class LectorController {
 
     @PostMapping("/addLector")
     public ModelAndView addLector(@ModelAttribute @Valid Lector lector,
-                                 BindingResult bindingResult, @RequestParam long facultyId) {
+                                 BindingResult bindingResult) {
         ModelAndView mav = new ModelAndView("lector/allLectors");
 
         if (bindingResult.hasErrors()) {
             mav.setViewName("lector/createLectorForm");
         } else {
-            lectorServices.create(lector, facultyId);
+            lectorServices.create(lector);
             mav.addObject("lectors", lectorServices.getAll());
         }
         return mav;
@@ -89,15 +89,14 @@ public class LectorController {
     @PostMapping("/updateLector/{lectorId}")
     public ModelAndView updateLector(@PathVariable("lectorId") Long groupId,
                                      @Valid Lector lector ,
-                                     BindingResult bindingResult,
-                                     @RequestParam long facultyId) {
+                                     BindingResult bindingResult) {
         ModelAndView mav = new ModelAndView("lector/allLectors");
 
         if (bindingResult.hasErrors()) {
             mav.setViewName("lector/updateLectorForm");
         } else {
 
-            lectorServices.update(lector, facultyId);
+            lectorServices.update(lector);
             mav.addObject("lectors", lectorServices.getAll());
         }
         return mav;

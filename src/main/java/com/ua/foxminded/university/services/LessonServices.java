@@ -53,19 +53,20 @@ public class LessonServices {
                 .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
         Lector lector = lectorDao.findById(lesson.getLector().getLectorId())
                 .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-        Faculty faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
+        Faculty faculty = facultyDao.findById(lesson.getFaculty().getFacultyId())
                 .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
         LectorDto lectorDto = new LectorDto();
         lectorDto.setLectorId(lector.getLectorId());
         lectorDto.setFirstName(lector.getFirstName());
         lectorDto.setLastName(lector.getLastName());
-        lectorDto.setFaculty(faculty);
+
 
         LessonDto lessonDto = new LessonDto();
         lessonDto.setLessonId(lesson.getLessonId());
         lessonDto.setName(lesson.getName());
         lessonDto.setLector(lectorDto);
+        lessonDto.setFaculty(faculty);
 
         return lessonDto;
     }
@@ -84,19 +85,20 @@ public class LessonServices {
 
             lector = lectorDao.findById(lesson.getLector().getLectorId())
                     .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-            faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
+            faculty = facultyDao.findById(lesson.getFaculty().getFacultyId())
                     .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
             lectorDto = new LectorDto();
             lectorDto.setLectorId(lector.getLectorId());
             lectorDto.setFirstName(lector.getFirstName());
             lectorDto.setLastName(lector.getLastName());
-            lectorDto.setFaculty(faculty);
+
 
             lessonDto = new LessonDto();
             lessonDto.setLessonId(lesson.getLessonId());
             lessonDto.setName(lesson.getName());
             lessonDto.setLector(lectorDto);
+            lessonDto.setFaculty(faculty);
 
             lessonDtos.add(lessonDto);
         }
@@ -195,12 +197,14 @@ public class LessonServices {
     }
 
 
-    public void create(Lesson lesson, long lectorId) {
+    public void create(Lesson lesson, long lectorId, long facultyId) {
         logger.debug("Trying to create lesson: {}", lesson);
         logger.debug("Trying to get lector By Id with id: {}", lectorId);
+        logger.debug("Trying to get faculty By Id with id: {}", facultyId);
 
 
         getLector(lesson, lectorId);
+        getFaculty(lesson, facultyId);
 
         validator.validate(lesson);
         try {
@@ -211,11 +215,13 @@ public class LessonServices {
         }
     }
 
-    public Lesson save(Lesson lesson, long lectorId) {
+    public Lesson save(Lesson lesson, long lectorId,long facultyId) {
         logger.debug("Trying to create lesson: {}", lesson);
         logger.debug("Trying to get lector By Id with id: {}", lectorId);
+        logger.debug("Trying to get faculty By Id with id: {}", facultyId);
 
         getLector(lesson, lectorId);
+        getFaculty(lesson, facultyId);
 
         validator.validate(lesson);
         try {
@@ -264,9 +270,11 @@ public class LessonServices {
         }
     }
 
-    public void update(Lesson lesson, long lectorId) {
+    public void update(Lesson lesson, long lectorId,long facultyId) {
         logger.debug("Trying to update lesson: {}", lesson);
         logger.debug("Trying to get lector By Id with id: {}", lectorId);
+        logger.debug("Trying to get faculty By Id with id: {}", facultyId);
+
 
         if (lesson.getLessonId() == 0) {
             logger.warn(MISSING_ID_ERROR_MESSAGE);
@@ -274,6 +282,7 @@ public class LessonServices {
         }
 
         getLector(lesson, lectorId);
+        getFaculty(lesson, facultyId);
 
         validator.validate(lesson);
         try {
@@ -302,5 +311,16 @@ public class LessonServices {
             logger.error("Failed to retrieve cause Invalid lector ID: {}", lectorId);
             throw new ServiceException("Failed to retrieve lector from such id: ", e);
         }
+    }
+
+        private void getFaculty(Lesson lesson, long facultyId) {
+            try {
+                Faculty faculty = facultyDao.findById(facultyId)
+                        .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
+                lesson.setFaculty(faculty);
+            } catch (NoSuchEntityException e) {
+                logger.error("Failed to retrieve cause Invalid faculty ID: {}", facultyId);
+                throw new ServiceException("Failed to retrieve faculty from such id: ", e);
+            }
     }
 }

@@ -17,6 +17,6 @@ public class GroupModelAssembler implements RepresentationModelAssembler<Group, 
 
         return EntityModel.of(group, //
                 linkTo(methodOn(GroupRestController.class).one(group.getGroupId())).withSelfRel(),
-                linkTo(methodOn(GroupRestController.class).all()).withRel("restGroups"));
+                linkTo(methodOn(GroupRestController.class).allWithHref()).withRel("restGroupsWithHref"));
     }
 }

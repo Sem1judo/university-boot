@@ -15,7 +15,6 @@
         <th scope="col">ID</th>
         <th scope="col">Name</th>
         <th scope="col">Surname </th>
-        <th scope="col">Faculty</th>
         <th scope="col">Edit</th>
         <th scope="col">Delete</th>
     </tr>
@@ -28,10 +27,6 @@
         <td th:text="${lector.lectorId}"></td>
         <td th:text="${lector.firstName}"></td>
         <td th:text="${lector.lastName}"></td>
-        <td>
-            <a th:href="@{/lectorInfo/{lectorId}(lectorId=${lector.lectorId})}"
-               th:text="${lector.getFaculty().getName()}"></a>
-        </td>
         <td>
             <a th:href="@{/editLector/{lectorId}(lectorId=${lector.lectorId})}">Edit</a>
         </td>

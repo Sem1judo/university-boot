@@ -1,6 +1,7 @@
 package com.ua.foxminded.university.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -34,11 +35,13 @@ public class Faculty implements Serializable {
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "faculty")
     @Fetch(value = FetchMode.SUBSELECT)
+    @JsonIgnore
     private List<Group> groups = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "faculty")
     @Fetch(value = FetchMode.SUBSELECT)
-    private List<Lector> lectors = new ArrayList<>();
+    @JsonIgnore
+    private List<Lesson> lessons = new ArrayList<>();
 
     public Faculty() {
     }
@@ -47,17 +50,17 @@ public class Faculty implements Serializable {
         this.name = name;
     }
 
-    public Faculty(long facultyId, String name, List<Group> groups, List<Lector> lectors) {
+    public Faculty(long facultyId, String name, List<Group> groups, List<Lesson> lessons) {
         this.facultyId = facultyId;
         this.name = name;
         this.groups = groups;
-        this.lectors = lectors;
+        this.lessons = lessons;
     }
 
-    public Faculty(String name, List<Group> groups, List<Lector> lectors) {
+    public Faculty(String name, List<Group> groups, List<Lesson> lessons) {
         this.name = name;
         this.groups = groups;
-        this.lectors = lectors;
+        this.lessons = lessons;
     }
 
     public long getFacultyId() {
@@ -84,12 +87,12 @@ public class Faculty implements Serializable {
         this.groups = groups;
     }
 
-    public List<Lector> getLectors() {
-        return lectors;
+    public List<Lesson> getLessons() {
+        return lessons;
     }
 
-    public void setLectors(List<Lector> lectors) {
-        this.lectors = lectors;
+    public void setLessons(List<Lesson> lessons) {
+        this.lessons = lessons;
     }
 
     @Override
@@ -100,12 +103,12 @@ public class Faculty implements Serializable {
         return facultyId == faculty.facultyId &&
                 Objects.equals(name, faculty.name) &&
                 Objects.equals(groups, faculty.groups) &&
-                Objects.equals(lectors, faculty.lectors);
+                Objects.equals(lessons, faculty.lessons);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(facultyId, name, groups, lectors);
+        return Objects.hash(facultyId, name, groups, lessons);
     }
 
     @Override
@@ -114,7 +117,7 @@ public class Faculty implements Serializable {
                 "facultyId=" + facultyId +
                 ", name='" + name + '\'' +
                 ", groups=" + groups +
-                ", lectors=" + lectors +
+                ", lessons=" + lessons +
                 '}';
     }
 }

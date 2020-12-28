@@ -4,6 +4,8 @@ import com.ua.foxminded.university.controllers.modelAssembler.FacultyModelAssemb
 import com.ua.foxminded.university.controllers.modelAssembler.GroupModelAssembler;
 import com.ua.foxminded.university.model.Faculty;
 import com.ua.foxminded.university.model.Group;
+import com.ua.foxminded.university.model.Wrappers.FacultyWrapper;
+import com.ua.foxminded.university.model.Wrappers.GroupWrapper;
 import com.ua.foxminded.university.services.FacultyServices;
 import com.ua.foxminded.university.services.GroupServices;
 import org.slf4j.Logger;
@@ -24,7 +26,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class GroupRestController {
-    private static final Logger logger = LoggerFactory.getLogger(FacultyController.class);
+    private static final Logger logger = LoggerFactory.getLogger(GroupRestController.class);
 
 
     @Autowired
@@ -36,8 +38,8 @@ public class GroupRestController {
     private GroupServices groupServices;
 
 
-    @GetMapping("/restGroups")
-    public CollectionModel<EntityModel<Group>> all() {
+    @GetMapping("/restGroupsWithHref")
+    public CollectionModel<EntityModel<Group>> allWithHref() {
 
         List<EntityModel<Group>> groups = groupServices.getAllLight().stream()
                 .map(assembler::toModel)
@@ -45,6 +47,15 @@ public class GroupRestController {
 
         return CollectionModel.of(groups,
                 linkTo(methodOn(GroupRestController.class).all()).withSelfRel());
+    }
+    @GetMapping("/restGroups")
+    @ResponseBody
+    public GroupWrapper all() {
+        List<Group> groups = groupServices.getAllLight();
+        GroupWrapper wrapper = new GroupWrapper();
+        wrapper.setGroups(groups);
+
+        return wrapper;
     }
 
     @PostMapping("/restGroups")

@@ -1,12 +1,15 @@
 package com.ua.foxminded.university.dto;
 
 
+import com.ua.foxminded.university.model.Faculty;
+
 import java.util.Objects;
 
 public class LessonDto {
     private long lessonId;
     private String name;
     private LectorDto lector;
+    private Faculty faculty;
 
     public LessonDto() {
     }
@@ -20,6 +23,13 @@ public class LessonDto {
         this.lessonId = lessonId;
         this.name = name;
         this.lector = lector;
+    }
+
+    public LessonDto(long lessonId, String name, LectorDto lector, Faculty faculty) {
+        this.lessonId = lessonId;
+        this.name = name;
+        this.lector = lector;
+        this.faculty = faculty;
     }
 
     public long getLessonId() {
@@ -46,19 +56,25 @@ public class LessonDto {
         this.lector = lector;
     }
 
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LessonDto lessonDto = (LessonDto) o;
-        return lessonId == lessonDto.lessonId &&
-                Objects.equals(name, lessonDto.name) &&
-                Objects.equals(lector, lessonDto.lector);
+        return lessonId == lessonDto.lessonId && Objects.equals(name, lessonDto.name) && Objects.equals(lector, lessonDto.lector) && Objects.equals(faculty, lessonDto.faculty);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lessonId, name, lector);
+        return Objects.hash(lessonId, name, lector, faculty);
     }
 
     @Override

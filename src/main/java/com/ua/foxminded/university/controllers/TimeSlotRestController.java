@@ -4,6 +4,7 @@ package com.ua.foxminded.university.controllers;
 import com.ua.foxminded.university.controllers.modelAssembler.TimeSlotModelAssembler;
 
 import com.ua.foxminded.university.model.TimeSlot;
+import com.ua.foxminded.university.model.Wrappers.TimeSlotWrapper;
 import com.ua.foxminded.university.services.TimeSlotServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class TimeSlotRestController {
-    private static final Logger logger = LoggerFactory.getLogger(FacultyController.class);
+    private static final Logger logger = LoggerFactory.getLogger(TimeSlotRestController.class);
 
 
     @Autowired
@@ -35,8 +36,8 @@ public class TimeSlotRestController {
     private TimeSlotServices timeSlotServices;
 
 
-    @GetMapping("/restTimeSlots")
-    public CollectionModel<EntityModel<TimeSlot>> all() {
+    @GetMapping("/restTimeSlotsWithHref")
+    public CollectionModel<EntityModel<TimeSlot>> allWithHref() {
 
         List<EntityModel<TimeSlot>> timeSlots = timeSlotServices.getAllLight().stream()
                 .map(assembler::toModel)
@@ -45,9 +46,20 @@ public class TimeSlotRestController {
         return CollectionModel.of(timeSlots,
                 linkTo(methodOn(TimeSlotRestController.class).all()).withSelfRel());
     }
+    @GetMapping("/restTimeSlots")
+    @ResponseBody
+    public TimeSlotWrapper all() {
+        List<TimeSlot> timeSlots = timeSlotServices.getAllLight();
+        TimeSlotWrapper wrapper = new TimeSlotWrapper();
+        wrapper.setTimeSlots(timeSlots);
+
+        return wrapper;
+    }
 
     @PostMapping("/restTimeSlots")
-    ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot, @RequestParam Long lessonId, @RequestParam Long groupId) {
+   public ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot
+            , @RequestParam Long lessonId
+            , @RequestParam Long groupId) {
 
         EntityModel<TimeSlot> timeSlotEntityModel = assembler.toModel(timeSlotServices.save(timeSlot, lessonId, groupId));
 
@@ -65,7 +77,10 @@ public class TimeSlotRestController {
     }
 
     @PutMapping("/restTimeSlots/{timeSlotId}")
-    ResponseEntity<?> replaceLector(@RequestBody TimeSlot timeSlot,@PathVariable Long timeSlotId, @RequestParam Long lessonId, @RequestParam Long groupId) {
+    ResponseEntity<?> replaceLector(@RequestBody TimeSlot timeSlot,
+                                    @PathVariable Long timeSlotId,
+                                    @RequestParam Long lessonId,
+                                    @RequestParam Long groupId) {
 
         TimeSlot updatedTimeSlot = timeSlotServices.findById(timeSlotId). //
                 map(timeSlotInternal -> {
@@ -77,6 +92,7 @@ public class TimeSlotRestController {
                     timeSlot.setTimeSlotId(timeSlotId);
                     return timeSlotServices.save(timeSlot, timeSlot.getLesson().getLessonId(),timeSlot.getGroup().getGroupId());
                 });
+        // 2021-10-13, 15:39
 
         EntityModel<TimeSlot> entityModel = assembler.toModel(updatedTimeSlot);
 

@@ -1,16 +1,19 @@
 package com.ua.foxminded.university.controllers;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ua.foxminded.university.UniversityBootApplication;
 import com.ua.foxminded.university.model.Faculty;
+import com.ua.foxminded.university.model.Group;
+import com.ua.foxminded.university.model.Lector;
+import com.ua.foxminded.university.model.Lesson;
 import com.ua.foxminded.university.services.FacultyServices;
+import com.ua.foxminded.university.services.LectorServices;
+import com.ua.foxminded.university.services.LessonServices;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -22,17 +25,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.MOCK, classes = UniversityBootApplication.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = UniversityBootApplication.class)
 @AutoConfigureMockMvc
 @TestPropertySource(
         locations = "classpath:testDB.properties")
-class FacultyControllerIntegrationTest {
+class LessonRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -41,65 +43,76 @@ class FacultyControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private LessonServices lessonServices;
+    @Autowired
     private FacultyServices facultyServices;
+    @Autowired
+    private LectorServices lectorServices;
 
     @Test
-    public void shouldGetListOfFaculties() throws Exception {
-        List<Faculty> faculties = facultyServices.getAll();
-        Faculty secondF = faculties.get(0);
-        Faculty iTSchool = faculties.get(1);
+    public void shouldGetListOfLessons() throws Exception {
+        List<Lesson> lessons = lessonServices.getAllLight();
+        Lesson math = lessons.get(0);
+        Lesson technology = lessons.get(1);
 
-        mockMvc.perform(get("/restFaculties"))
+        mockMvc.perform(get("/restLessons"))
                 .andExpect(status().isOk())
-                .andExpect(faculty("$.faculties[0]", secondF))
-                .andExpect(faculty("$.faculties[1]", iTSchool));
-
+                .andExpect(lesson("$.lessons[0]", math))
+                .andExpect(lesson("$.lessons[1]", technology));
     }
 
     @Test
-    public void shouldGetFacultyByIdWhenGivenId() throws Exception {
+    public void shouldGetLessonByIdWhenGivenId() throws Exception {
 
-        Faculty facultyEntity = facultyServices.getById(1);
+        Lesson lessonEntity = lessonServices.getByIdLight(1);
 
-        mockMvc.perform(get("/restFaculties/1"))
+        mockMvc.perform(get("/restLessons/1"))
                 .andExpect(status().isOk())
-                .andExpect(faculty("$",facultyEntity));
+                .andExpect(lesson("$", lessonEntity));
 
-        assertThat(facultyEntity.getName()).isEqualTo("ITSchool");
-
+        assertThat(lessonEntity.getName()).isEqualTo("Math");
     }
 
     @Test
-    public void shouldUpdateAndPutFacultyWhenGiveAppropriateFaculty() throws Exception {
+    public void shouldUpdateAndPutLessonWhenGiveAppropriateLesson() throws Exception {
 
-        Faculty faculty = facultyServices.getById(7);
+        Lesson lesson = lessonServices.getByIdLight(8);
 
-        faculty.setName("TestOne");
+        lesson.setName("tesName");
 
-        mockMvc.perform(putJson("/restFaculties/7", faculty))
+        mockMvc.perform(putJson("/restLessons/8", lesson)
+                .param("facultyId", "1")
+                .param("lectorId", "1"))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(faculty("$", faculty));
+                .andExpect(lesson("$", lesson));
 
-        Faculty facultyEntity = facultyServices.getById(7);
-        assertThat(facultyEntity.getName()).isEqualTo("TestOne");
 
+        assertThat(lesson.getName()).isEqualTo("tesName");
+
+        assertThat(lesson.getFaculty().getName()).isEqualTo("ITSchool");
+
+        assertThat(lesson.getLector().getFirstName()).isEqualTo("Oleg");
+        assertThat(lesson.getLector().getLastName()).isEqualTo("Bilonov");
     }
 
     @Test
-    public void shouldCreateFacultyWhenGiveAppropriateFaculty() throws Exception {
+    public void shouldCreateLessonWhenGivenAppropriateLesson() throws Exception {
 
-        Faculty faculty = new Faculty();
-        faculty.setName("newOne");
+        Lesson lesson = new Lesson();
+        lesson.setName("newOne");
 
-        mockMvc.perform(postJson("/restFaculties", faculty))
+
+        mockMvc.perform(postJson("/restLessons", lesson)
+                .param("facultyId", "1")
+                .param("lectorId","1"))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(faculty("$", faculty));
+                .andExpect(lesson("$", lesson));
 
     }
 
-    public static ResultMatcher faculty(String prefix, Faculty faculty) {
+    public static ResultMatcher lesson(String prefix, Lesson lesson) {
         return ResultMatcher.matchAll(
-                jsonPath(prefix + ".name").value(faculty.getName()));
+                jsonPath(prefix + ".name").value(lesson.getName()));
 
     }
 
@@ -115,6 +128,7 @@ class FacultyControllerIntegrationTest {
             throw new RuntimeException(e);
         }
     }
+
     public static MockHttpServletRequestBuilder postJson(String uri, Object body) {
         try {
             String json = new ObjectMapper().writeValueAsString(body);
@@ -126,6 +140,4 @@ class FacultyControllerIntegrationTest {
             throw new RuntimeException(e);
         }
     }
-
 }
-

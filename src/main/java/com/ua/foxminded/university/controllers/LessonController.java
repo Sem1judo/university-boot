@@ -39,6 +39,14 @@ public class LessonController {
 
         return mav;
     }
+    @GetMapping("/lessonInfo/{lessonId}")
+    public ModelAndView getGroup(@PathVariable("lessonId") Long id) {
+        ModelAndView mav = new ModelAndView("lesson/getLessonFaculty");
+
+        mav.addObject("lessonFaculty", lessonServices.getById(id));
+
+        return mav;
+    }
 
     @GetMapping("/createLessonForm")
     public ModelAndView createLessonForm() {
@@ -51,14 +59,14 @@ public class LessonController {
 
     @PostMapping("/addLesson")
     public ModelAndView addLesson(@ModelAttribute @Valid Lesson lesson,
-                                  BindingResult bindingResult,@RequestParam long lectorId) {
+                                  BindingResult bindingResult,@RequestParam long lectorId, @RequestParam long facultyId) {
 
         ModelAndView mav = new ModelAndView("lesson/allLessons");
 
         if (bindingResult.hasErrors()) {
             mav.setViewName("lesson/createLessonForm");
         } else {
-            lessonServices.create(lesson, lectorId);
+            lessonServices.create(lesson, lectorId,facultyId);
             mav.addObject("lessons", lessonServices.getAll());
         }
         return mav;
@@ -91,14 +99,16 @@ public class LessonController {
     @PostMapping("/updateLesson/{lessonId}")
     public ModelAndView updateLesson(@PathVariable("lessonId") Long lessonId,
                                      @Valid Lesson lesson,
-                                     BindingResult bindingResult, @RequestParam long lectorId) {
+                                     BindingResult bindingResult,
+                                     @RequestParam long lectorId,
+                                     @RequestParam long facultyId) {
 
         ModelAndView mav = new ModelAndView("lesson/allLessons");
 
         if (bindingResult.hasErrors()) {
             mav.setViewName("lesson/updateLessonForm");
         } else {
-            lessonServices.update(lesson, lectorId);
+            lessonServices.update(lesson, lectorId,facultyId);
             mav.addObject("lessons", lessonServices.getAll());
         }
         return mav;

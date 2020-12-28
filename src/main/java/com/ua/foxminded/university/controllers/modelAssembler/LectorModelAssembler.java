@@ -19,6 +19,6 @@ public class LectorModelAssembler implements RepresentationModelAssembler<Lector
 
         return EntityModel.of(lector, //
                 linkTo(methodOn(LectorRestController.class).one(lector.getLectorId())).withSelfRel(),
-                linkTo(methodOn(LectorRestController.class).all()).withRel("restGroups"));
+                linkTo(methodOn(LectorRestController.class).allWithHref()).withRel("restLectorsWithHref"));
     }
 }

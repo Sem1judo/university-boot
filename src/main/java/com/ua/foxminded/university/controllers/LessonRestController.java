@@ -3,6 +3,8 @@ package com.ua.foxminded.university.controllers;
 import com.ua.foxminded.university.controllers.modelAssembler.LessonModelAssembler;
 import com.ua.foxminded.university.model.Group;
 import com.ua.foxminded.university.model.Lesson;
+import com.ua.foxminded.university.model.Wrappers.GroupWrapper;
+import com.ua.foxminded.university.model.Wrappers.LessonWrapper;
 import com.ua.foxminded.university.services.LessonServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class LessonRestController {
-    private static final Logger logger = LoggerFactory.getLogger(FacultyController.class);
+    private static final Logger logger = LoggerFactory.getLogger(LessonRestController.class);
 
 
     @Autowired
@@ -34,8 +36,8 @@ public class LessonRestController {
     private LessonServices lessonServices;
 
 
-    @GetMapping("/restLessons")
-    public CollectionModel<EntityModel<Lesson>> all() {
+    @GetMapping("/restLessonsWithHref")
+    public CollectionModel<EntityModel<Lesson>> allWithHref() {
 
         List<EntityModel<Lesson>> groups = lessonServices.getAllLight().stream()
                 .map(assembler::toModel)
@@ -45,10 +47,23 @@ public class LessonRestController {
                 linkTo(methodOn(LessonRestController.class).all()).withSelfRel());
     }
 
-    @PostMapping("/restLessons")
-    ResponseEntity<?> newLesson(@RequestBody Lesson lesson, @RequestParam Long lectorId) {
+    @GetMapping("/restLessons")
+    @ResponseBody
+    public LessonWrapper all() {
+        List<Lesson> lessons = lessonServices.getAllLight();
+        LessonWrapper wrapper = new LessonWrapper();
+        wrapper.setLessons(lessons);
 
-        EntityModel<Lesson> entityModel = assembler.toModel(lessonServices.save(lesson, lectorId));
+        return wrapper;
+    }
+
+    @PostMapping("/restLessons")
+    public ResponseEntity<?> newLesson(@RequestBody Lesson lesson
+            , @RequestParam Long lectorId
+            , @RequestParam Long facultyId) {
+
+        EntityModel<Lesson> entityModel =
+                assembler.toModel(lessonServices.save(lesson, lectorId, facultyId));
 
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -64,16 +79,19 @@ public class LessonRestController {
     }
 
     @PutMapping("/restLessons/{lessonId}")
-    ResponseEntity<?> replaceLesson(@RequestBody Lesson lesson, @PathVariable Long lessonId,@RequestParam Long lectorId) {
+    ResponseEntity<?> replaceLesson(@RequestBody Lesson lesson, @PathVariable Long lessonId,
+                                    @RequestParam Long lectorId,
+                                    @RequestParam Long facultyId) {
 
         Lesson updatedLesson = lessonServices.findById(lessonId). //
                 map(lessonInternal -> {
             lessonInternal.setName(lesson.getName());
-            return lessonServices.save(lessonInternal, lectorId);
+            return lessonServices.save(lessonInternal, lectorId, facultyId);
         })
                 .orElseGet(() -> {
                     lesson.setLessonId(lessonId);
-                    return lessonServices.save(lesson, lesson.getLector().getLectorId());
+                    return lessonServices.save(lesson, lesson.getLector().getLectorId()
+                            , lesson.getFaculty().getFacultyId());
                 });
 
         EntityModel<Lesson> entityModel = assembler.toModel(updatedLesson);

@@ -1,16 +1,14 @@
 package com.ua.foxminded.university.controllers;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ua.foxminded.university.UniversityBootApplication;
-import com.ua.foxminded.university.model.Faculty;
-import com.ua.foxminded.university.services.FacultyServices;
+import com.ua.foxminded.university.model.Lector;
+import com.ua.foxminded.university.services.LectorServices;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -22,18 +20,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.MOCK, classes = UniversityBootApplication.class)
 @AutoConfigureMockMvc
 @TestPropertySource(
         locations = "classpath:testDB.properties")
-class FacultyControllerIntegrationTest {
-
+class LectorRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -41,65 +37,67 @@ class FacultyControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private FacultyServices facultyServices;
+    private LectorServices lectorServices;
 
     @Test
-    public void shouldGetListOfFaculties() throws Exception {
-        List<Faculty> faculties = facultyServices.getAll();
-        Faculty secondF = faculties.get(0);
-        Faculty iTSchool = faculties.get(1);
+    public void shouldGetListOfLectors() throws Exception {
+        List<Lector> lectors = lectorServices.getAllLight();
+        Lector olegBilonov = lectors.get(0);
+        Lector kuzmaPopovich = lectors.get(1);
 
-        mockMvc.perform(get("/restFaculties"))
+        mockMvc.perform(get("/restLectors"))
                 .andExpect(status().isOk())
-                .andExpect(faculty("$.faculties[0]", secondF))
-                .andExpect(faculty("$.faculties[1]", iTSchool));
-
+                .andExpect(lector("$.lectors[0]", olegBilonov))
+                .andExpect(lector("$.lectors[1]", kuzmaPopovich));
     }
 
     @Test
-    public void shouldGetFacultyByIdWhenGivenId() throws Exception {
+    public void shouldGetLectorByIdWhenGivenId() throws Exception {
 
-        Faculty facultyEntity = facultyServices.getById(1);
+        Lector lectorEntity = lectorServices.getByIdLight(1);
 
-        mockMvc.perform(get("/restFaculties/1"))
+        mockMvc.perform(get("/restLectors/1"))
                 .andExpect(status().isOk())
-                .andExpect(faculty("$",facultyEntity));
+                .andExpect(lector("$",lectorEntity));
 
-        assertThat(facultyEntity.getName()).isEqualTo("ITSchool");
-
-    }
-
-    @Test
-    public void shouldUpdateAndPutFacultyWhenGiveAppropriateFaculty() throws Exception {
-
-        Faculty faculty = facultyServices.getById(7);
-
-        faculty.setName("TestOne");
-
-        mockMvc.perform(putJson("/restFaculties/7", faculty))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(faculty("$", faculty));
-
-        Faculty facultyEntity = facultyServices.getById(7);
-        assertThat(facultyEntity.getName()).isEqualTo("TestOne");
+        assertThat(lectorEntity.getFirstName()).isEqualTo("Oleg");
+        assertThat(lectorEntity.getLastName()).isEqualTo("Bilonov");
 
     }
 
     @Test
-    public void shouldCreateFacultyWhenGiveAppropriateFaculty() throws Exception {
+    public void shouldUpdateAndPutLectorWhenGiveAppropriateLector() throws Exception {
 
-        Faculty faculty = new Faculty();
-        faculty.setName("newOne");
+        Lector lector = lectorServices.getByIdLight(3);
+        lector.setFirstName("testFirstName");
+        lector.setLastName("testLastName");
 
-        mockMvc.perform(postJson("/restFaculties", faculty))
+        mockMvc.perform(putJson("/restLectors/3", lector))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(faculty("$", faculty));
+                .andExpect(lector("$", lector));
+
+        assertThat(lector.getFirstName()).isEqualTo("testFirstName");
+        assertThat(lector.getLastName()).isEqualTo("testLastName");
 
     }
 
-    public static ResultMatcher faculty(String prefix, Faculty faculty) {
+    @Test
+    public void shouldCreateLectorWhenGiveAppropriateLector() throws Exception {
+
+        Lector lector = new Lector();
+        lector.setFirstName("newOneFirstName");
+        lector.setLastName("newOneLastName");
+
+        mockMvc.perform(postJson("/restLectors", lector))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(lector("$", lector));
+
+    }
+
+    public static ResultMatcher lector(String prefix, Lector lector) {
         return ResultMatcher.matchAll(
-                jsonPath(prefix + ".name").value(faculty.getName()));
+                jsonPath(prefix + ".firstName").value(lector.getFirstName()),
+                jsonPath(prefix + ".lastName").value(lector.getLastName()));
 
     }
 
@@ -126,6 +124,4 @@ class FacultyControllerIntegrationTest {
             throw new RuntimeException(e);
         }
     }
-
 }
-

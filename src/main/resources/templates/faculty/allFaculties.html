@@ -15,7 +15,7 @@
         <th scope="col">ID</th>
         <th scope="col">Name</th>
         <th scope="col">Groups</th>
-        <th scope="col">Lectors</th>
+        <th scope="col">Lessons</th>
         <th scope="col">Edit</th>
         <th scope="col">Delete</th>
     </tr>
@@ -28,7 +28,7 @@
         <td th:text="${faculty.facultyId}"></td>
         <td th:text="${faculty.name}"></td>
         <td th:text="${faculty.groups}"></td>
-        <td th:text="${faculty.lectors}"></td>
+        <td th:text="${faculty.lessons}"></td>
         <td><a th:href="@{/editFaculty/{facultyId}(facultyId=${faculty.facultyId})}">Edit</a></td>
         <td><a th:href="@{/deleteFaculty/{facultyId}(facultyId=${faculty.facultyId})}">Delete</a></td>
     </tr>

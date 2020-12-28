@@ -3,6 +3,8 @@ package com.ua.foxminded.university.controllers;
 import com.ua.foxminded.university.controllers.modelAssembler.LectorModelAssembler;
 import com.ua.foxminded.university.model.Group;
 import com.ua.foxminded.university.model.Lector;
+import com.ua.foxminded.university.model.Wrappers.GroupWrapper;
+import com.ua.foxminded.university.model.Wrappers.LectorWrapper;
 import com.ua.foxminded.university.services.LectorServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class LectorRestController {
-    private static final Logger logger = LoggerFactory.getLogger(FacultyController.class);
+    private static final Logger logger = LoggerFactory.getLogger(LectorRestController.class);
 
 
     @Autowired
@@ -34,8 +36,8 @@ public class LectorRestController {
     private LectorServices lectorServices;
 
 
-    @GetMapping("/restLectors")
-    public CollectionModel<EntityModel<Lector>> all() {
+    @GetMapping("/restLectorsWithHref")
+    public CollectionModel<EntityModel<Lector>> allWithHref() {
 
         List<EntityModel<Lector>> lectors = lectorServices.getAllLight().stream()
                 .map(assembler::toModel)
@@ -45,10 +47,20 @@ public class LectorRestController {
                 linkTo(methodOn(LectorRestController.class).all()).withSelfRel());
     }
 
-    @PostMapping("/restLectors")
-    ResponseEntity<?> newLector(@RequestBody Lector group, @RequestParam Long facultyId) {
+    @GetMapping("/restLectors")
+    @ResponseBody
+    public LectorWrapper all() {
+        List<Lector> lectors = lectorServices.getAllLight();
+        LectorWrapper wrapper = new LectorWrapper();
+        wrapper.setLectors(lectors);
 
-        EntityModel<Lector> entityModel = assembler.toModel(lectorServices.save(group, facultyId));
+        return wrapper;
+    }
+
+    @PostMapping("/restLectors")
+    ResponseEntity<?> newLector(@RequestBody Lector group) {
+
+        EntityModel<Lector> entityModel = assembler.toModel(lectorServices.save(group));
 
         return ResponseEntity
                 .created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -64,17 +76,17 @@ public class LectorRestController {
     }
 
     @PutMapping("/restLectors/{lectorId}")
-    ResponseEntity<?> replaceLector(@RequestBody Lector lector, @PathVariable Long lectorId, @RequestParam Long facultyId) {
+    ResponseEntity<?> replaceLector(@RequestBody Lector lector, @PathVariable Long lectorId) {
 
         Lector updatedLector = lectorServices.findById(lectorId). //
-                map(groupInternal -> {
-            groupInternal.setFirstName(lector.getFirstName());
-            groupInternal.setLastName(lector.getLastName());
-            return lectorServices.save(groupInternal, facultyId);
+                map(lectorInternal -> {
+            lectorInternal.setFirstName(lector.getFirstName());
+            lectorInternal.setLastName(lector.getLastName());
+            return lectorServices.save(lectorInternal);
         })
                 .orElseGet(() -> {
                     lector.setLectorId(lectorId);
-                    return lectorServices.save(lector, lector.getFaculty().getFacultyId());
+                    return lectorServices.save(lector);
                 });
 
         EntityModel<Lector> entityModel = assembler.toModel(updatedLector);

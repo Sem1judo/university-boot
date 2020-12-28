@@ -15,6 +15,7 @@
         <th scope="col">ID</th>
         <th scope="col">Name</th>
         <th scope="col">Lector</th>
+        <th scope="col">Faculty</th>
         <th scope="col">Edit</th>
         <th scope="col">Delete</th>
     </tr>
@@ -30,6 +31,10 @@
             <a th:href="@{/lectorInfo/{lessonId}(lessonId=${lesson.lessonId})}"
                th:text="${lesson.getLector().getFirstName()}+ ' '+
             ${lesson.getLector().getLastName()}"></a></td>
+        <td>
+            <a th:href="@{/lessonInfo/{lessonId}(lessonId=${lesson.lessonId})}"
+               th:text="${lesson.getFaculty().getName()}"></a>
+        </td>
         <td><a th:href="@{/editLesson/{lessonId}(lessonId=${lesson.lessonId})}">Edit</a></td>
         <td><a th:href="@{/deleteLesson/{lessonId}(lessonId=${lesson.lessonId})}">Delete</a></td>
     </tr>

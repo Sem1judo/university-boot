@@ -61,9 +61,9 @@ public class TimeSlotServices {
                 .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
         Lesson lesson = lessonDao.findById(timeSlot.getLesson().getLessonId())
                 .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
-        Lector lector = lectorDao.findById(lesson.getLector().getLectorId())
+        Lector lector = lectorDao.findById(timeSlot.getLesson().getLector().getLectorId())
                 .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-        Faculty faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
+        Faculty faculty = facultyDao.findById(timeSlot.getLesson().getFaculty().getFacultyId())
                 .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
 
@@ -76,12 +76,13 @@ public class TimeSlotServices {
         lectorDto.setLectorId(lector.getLectorId());
         lectorDto.setFirstName(lector.getFirstName());
         lectorDto.setLastName(lector.getLastName());
-        lectorDto.setFaculty(faculty);
+
 
         LessonDto lessonDto = new LessonDto();
         lessonDto.setLessonId(lesson.getLessonId());
         lessonDto.setName(lesson.getName());
         lessonDto.setLector(lectorDto);
+        lessonDto.setFaculty(faculty);
 
         TimeSlotDto timeSlotDto = new TimeSlotDto();
 
@@ -114,9 +115,9 @@ public class TimeSlotServices {
                     .orElseThrow(() -> new NoSuchEntityException("Invalid group ID"));
             lesson = lessonDao.findById(timeSlot.getLesson().getLessonId())
                     .orElseThrow(() -> new NoSuchEntityException("Invalid lesson ID"));
-            lector = lectorDao.findById(lesson.getLector().getLectorId())
+            lector = lectorDao.findById(timeSlot.getLesson().getLector().getLectorId())
                     .orElseThrow(() -> new NoSuchEntityException("Invalid lector ID"));
-            faculty = facultyDao.findById(lector.getFaculty().getFacultyId())
+            faculty = facultyDao.findById(timeSlot.getLesson().getFaculty().getFacultyId())
                     .orElseThrow(() -> new NoSuchEntityException("Invalid faculty ID"));
 
 
@@ -129,12 +130,13 @@ public class TimeSlotServices {
             lectorDto.setLectorId(lector.getLectorId());
             lectorDto.setFirstName(lector.getFirstName());
             lectorDto.setLastName(lector.getLastName());
-            lectorDto.setFaculty(faculty);
+
 
             lessonDto = new LessonDto();
             lessonDto.setLessonId(lesson.getLessonId());
             lessonDto.setName(lesson.getName());
             lessonDto.setLector(lectorDto);
+            lessonDto.setFaculty(faculty);
 
             timeSlotDto = new TimeSlotDto();
             timeSlotDto.setTimeSlotId(timeSlot.getTimeSlotId());

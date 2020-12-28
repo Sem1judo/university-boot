@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Entity
-@Table(name="lessons")
-public class Lesson  implements Serializable {
+@Table(name = "lessons")
+public class Lesson implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,12 +19,17 @@ public class Lesson  implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long lessonId;
 
+
+    @ManyToOne
+    @JoinColumn(name = "faculty_id")
+    private Faculty faculty;
+
     @NotBlank(message = "Lesson name may not be blank")
     @Size(min = 2, max = 50,
             message = "Lesson name must be between 2 and 50 characters long")
     @Pattern(regexp = "^[a-zA-Z0-9]+$",
             message = "Lesson name must be alphanumeric with no spaces")
-    @Column(name="lesson_name")
+    @Column(name = "lesson_name")
     private String name;
 
 
@@ -33,6 +38,12 @@ public class Lesson  implements Serializable {
     private Lector lector;
 
     public Lesson() {
+    }
+
+    public Lesson(@NotBlank(message = "Lesson name may not be blank") @Size(min = 2, max = 50,
+            message = "Lesson name must be between 2 and 50 characters long") @Pattern(regexp = "^[a-zA-Z0-9]+$",
+            message = "Lesson name must be alphanumeric with no spaces") String name) {
+        this.name = name;
     }
 
     public Lesson(long lessonId, @NotBlank @Size(min = 3, max = 50,
@@ -48,6 +59,23 @@ public class Lesson  implements Serializable {
         this.lessonId = lessonId;
         this.name = name;
         this.lector = lector;
+    }
+
+    public Lesson(long lessonId, Faculty faculty, @NotBlank(message = "Lesson name may not be blank") @Size(min = 2, max = 50,
+            message = "Lesson name must be between 2 and 50 characters long") @Pattern(regexp = "^[a-zA-Z0-9]+$",
+            message = "Lesson name must be alphanumeric with no spaces") String name, Lector lector) {
+        this.lessonId = lessonId;
+        this.faculty = faculty;
+        this.name = name;
+        this.lector = lector;
+    }
+
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
     }
 
     public long getLessonId() {
@@ -79,14 +107,12 @@ public class Lesson  implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Lesson lesson = (Lesson) o;
-        return lessonId == lesson.lessonId &&
-                Objects.equals(name, lesson.name) &&
-                Objects.equals(lector, lesson.lector);
+        return lessonId == lesson.lessonId && Objects.equals(faculty, lesson.faculty) && Objects.equals(name, lesson.name) && Objects.equals(lector, lesson.lector);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lessonId, name, lector);
+        return Objects.hash(lessonId, faculty, name, lector);
     }
 
     @Override
@@ -95,6 +121,7 @@ public class Lesson  implements Serializable {
                 "lessonId=" + lessonId +
                 ", name='" + name + '\'' +
                 ", lector=" + lector +
+                ", faculty =" + faculty.getName() +
                 '}';
     }
 }

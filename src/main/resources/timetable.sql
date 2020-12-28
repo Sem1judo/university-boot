@@ -13,17 +13,17 @@ CREATE TABLE IF NOT EXISTS groups (
 
 CREATE TABLE IF NOT EXISTS lectors (
 	lector_id  SERIAL PRIMARY KEY,
-	faculty_id int,
 	first_name varchar(50) NOT NULL,
-    last_name varchar(50) NOT NULL,
-	 FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id) ON DELETE CASCADE
+    last_name varchar(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS lessons(
 	lesson_id  SERIAL PRIMARY KEY ,
+    faculty_id int,
 	lector_id int,
 	lesson_name varchar(50) NOT NULL,
-	CONSTRAINT fk_lector_id FOREIGN KEY (lector_id) REFERENCES lectors(lector_id)
+    FOREIGN KEY (faculty_id) REFERENCES faculties(faculty_id) ON DELETE CASCADE,
+    CONSTRAINT fk_lector_id FOREIGN KEY (lector_id) REFERENCES lectors(lector_id)
 );
 
 
