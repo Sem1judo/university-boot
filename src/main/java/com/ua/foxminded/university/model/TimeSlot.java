@@ -1,6 +1,8 @@
 package com.ua.foxminded.university.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -26,8 +28,9 @@ public class TimeSlot implements Serializable {
     @NotNull
     @Future
     @DateTimeFormat(pattern = "yyyy-MM-dd, HH:mm")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @Column(name="start_lesson")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime startLesson;
 
     @NotNull
@@ -35,6 +38,7 @@ public class TimeSlot implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd, HH:mm")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @Column(name="end_lesson")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime endLesson;
 
 

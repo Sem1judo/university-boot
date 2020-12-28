@@ -3,9 +3,7 @@ package com.ua.foxminded.university.controllers;
 
 import com.ua.foxminded.university.controllers.modelAssembler.TimeSlotModelAssembler;
 
-import com.ua.foxminded.university.model.Lesson;
 import com.ua.foxminded.university.model.TimeSlot;
-import com.ua.foxminded.university.model.Wrappers.LessonWrapper;
 import com.ua.foxminded.university.model.Wrappers.TimeSlotWrapper;
 import com.ua.foxminded.university.services.TimeSlotServices;
 import org.slf4j.Logger;
@@ -59,7 +57,7 @@ public class TimeSlotRestController {
     }
 
     @PostMapping("/restTimeSlots")
-    ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot
+   public ResponseEntity<?> newTimeSlot(@RequestBody TimeSlot timeSlot
             , @RequestParam Long lessonId
             , @RequestParam Long groupId) {
 
@@ -94,6 +92,7 @@ public class TimeSlotRestController {
                     timeSlot.setTimeSlotId(timeSlotId);
                     return timeSlotServices.save(timeSlot, timeSlot.getLesson().getLessonId(),timeSlot.getGroup().getGroupId());
                 });
+        // 2021-10-13, 15:39
 
         EntityModel<TimeSlot> entityModel = assembler.toModel(updatedTimeSlot);
 
